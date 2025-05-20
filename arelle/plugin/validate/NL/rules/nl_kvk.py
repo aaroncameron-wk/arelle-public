@@ -5,18 +5,23 @@ from __future__ import annotations
 
 from datetime import date
 
+from lxml.etree import _Comment, _ProcessingInstruction, _Entity, _ElementTree
+
 from arelle.ModelInstanceObject import ModelInlineFact
+from arelle.UrlUtil import scheme
 from arelle.ValidateDuplicateFacts import getDuplicateFactSets
 from arelle.XmlValidateConst import VALID
 from collections.abc import Iterable
 from typing import Any, TYPE_CHECKING
 
 from arelle import XmlUtil
+from arelle.ModelValue import qnameClarkName
 from arelle.ValidateXbrl import ValidateXbrl
 from arelle.typing import TypeGetText
 from arelle.utils.PluginHooks import ValidationHook
 from arelle.utils.validate.Decorator import validation
 from arelle.utils.validate.Validation import Validation
+from arelle.utils.validate.ValidationUtil import etreeIterWithDepth
 from ..DisclosureSystems import DISCLOSURE_SYSTEM_NL_INLINE_2024
 from ..PluginValidationDataExtension import PluginValidationDataExtension, XBRLI_IDENTIFIER_PATTERN, XBRLI_IDENTIFIER_SCHEMA, DISALLOWED_IXT_NAMESPACES
 
@@ -518,4 +523,38 @@ def rule_nl_kvk_3_5_2_2(
             codes='NL.NL-KVK.3.5.2.2.taggedTextFactOnlyInLanguagesOtherThanLanguageOfAReport',
             msg=_('Tagged text facts MUST be provided in the language of the report.'),
             modelObject=factsWithWrongLang
+        )
+
+
+@validation(
+    hook=ValidationHook.XBRL_FINALLY,
+    disclosureSystems=[
+        DISCLOSURE_SYSTEM_NL_INLINE_2024
+    ],
+)
+def rule_nl_kvk_3_6_2_1(
+        pluginData: PluginValidationDataExtension,
+        val: ValidateXbrl,
+        *args: Any,
+        **kwargs: Any,
+) -> Iterable[Validation]:
+    """
+    NL-KVK.3.6.2.1: An Inline XBRL Document Set MUST NOT contain references pointing to resources outside the report package.
+    """
+    invalidElements = []
+    if val.modelXbrl.ixdsHtmlElements:
+        for ixdsHtmlRootElt in val.modelXbrl.ixdsHtmlElements:
+            for element, __ in etreeIterWithDepth(ixdsHtmlRootElt):
+                if isinstance(element, (_Comment, _ElementTree, _Entity, _ProcessingInstruction)):
+                    continue
+                if qnameClarkName(element.tag).localName != 'img':
+                    continue
+                src = element.get("src", "").strip()
+                if scheme(src) in ("http", "https", "ftp"):
+                    invalidElements.append(element)
+    if len(invalidElements) > 0:
+        yield Validation.error(
+            codes='NL.NL-KVK.3.6.2.1.inlineXbrlDocumentContainsExternalReferences',
+            msg=_('An Inline XBRL Document Set MUST NOT contain references pointing to resources outside the report package.'),
+            modelObject=invalidElements
         )
