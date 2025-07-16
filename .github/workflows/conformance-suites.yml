@@ -27,7 +27,7 @@ jobs:
       - id: build-test-matrix
         run: |
           echo 'matrix<<EOF' >> $GITHUB_OUTPUT
-          python -m tests.integration_tests.validation.discover_tests | tee -a $GITHUB_OUTPUT
+          python -m tests.integration_tests.validation.discover_tests --pr-body "${{ github.event.pull_request.body }}" | tee -a $GITHUB_OUTPUT
           echo EOF >> $GITHUB_OUTPUT
 
   run-conformance-suite:

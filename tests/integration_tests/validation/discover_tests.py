@@ -1,8 +1,12 @@
 from __future__ import annotations
+
+import argparse
+import fnmatch
 import json
+
+import regex
 import sys
-from collections.abc import Iterable
-from typing import TypedDict
+from typing import TypedDict, Iterable
 
 from .conformance_suite_config import ConformanceSuiteConfig
 from .conformance_suite_configs import CI_CONFORMANCE_SUITE_CONFIGS
@@ -98,41 +102,78 @@ def generate_config_entries(config: ConformanceSuiteConfig, os: str, python_vers
             )
 
 
+def _skip_config(name: str, patterns: list[str]) -> bool:
+    if patterns and not any(fnmatch.fnmatch(name, pattern) for pattern in patterns):
+        return True
+    return False
+
+
 def main() -> None:
+
+    parser = argparse.ArgumentParser(
+        prog='Conformance Suite Discovery',
+        description='Discover conformance suite configurations for integration tests.'
+    )
+    parser.add_argument(
+        '--pr-body',
+        help='Pull request body to extract CONFORMANCE_SUITE_FILTER patterns from. '
+             'If one or more filters are provided, only conformance suite configs that '
+             'match at least one filter will be included. Filters should be provided in '
+             'the form CONFORMANCE_SUITE_FILTER(?) anywhere in the body, where ? is a '
+             'glob pattern. ',
+    )
+    args = parser.parse_args()
+    pr_body = args.pr_body or ''
+    patterns = regex.findall(r'CONFORMANCE_SUITE_FILTER\((.*)\)', pr_body)
+
+    candidate_configs = [
+        config for config in CI_CONFORMANCE_SUITE_CONFIGS
+        if not _skip_config(config.name, patterns)
+    ]
+    candidate_fast_config_names = [
+        name for name in FAST_CONFIG_NAMES
+        if not _skip_config(name, patterns)
+    ]
+
     output: list[Entry] = []
     config_names_seen: set[str] = set()
     private = False
-    for config in CI_CONFORMANCE_SUITE_CONFIGS:
-        if config.name in FAST_CONFIG_NAMES:
-            assert not config.network_or_cache_required
-            assert config.shards == 1
-            config_names_seen.add(config.name)
-            private |= config.has_private_asset
-    assert not (FAST_CONFIG_NAMES - config_names_seen), \
-        f'Missing some fast configurations: {sorted(FAST_CONFIG_NAMES - config_names_seen)}'
-    for os in [LINUX, MACOS, WINDOWS]:
-        output.append(generate_config_entry(
-            name=','.join(sorted(FAST_CONFIG_NAMES)),
-            short_name='miscellaneous suites',
-            os=os,
-            private=private,
-            python_version=LATEST_PYTHON_VERSION,
-            shard=None,
-        ))
+    if not patterns:
+        for config in candidate_configs:
+            if config.name in candidate_fast_config_names:
+                assert not config.network_or_cache_required
+                assert config.shards == 1
+                config_names_seen.add(config.name)
+                private |= config.has_private_asset
+        assert not (candidate_fast_config_names - config_names_seen), \
+            f'Missing some fast configurations: {sorted(candidate_fast_config_names - config_names_seen)}'
+        for os in [LINUX, MACOS, WINDOWS]:
+            output.append(generate_config_entry(
+                name=','.join(sorted(candidate_fast_config_names)),
+                short_name='miscellaneous suites',
+                os=os,
+                private=private,
+                python_version=LATEST_PYTHON_VERSION,
+                shard=None,
+            ))
 
-    for config in CI_CONFORMANCE_SUITE_CONFIGS:
+    for config in candidate_configs:
         # configurations don't necessarily have unique names, e.g. malformed UTR
         if config.name in config_names_seen:
             continue
+        if patterns and not any(fnmatch.fnmatch(config.name, pattern) for pattern in patterns):
+            continue
         config_names_seen.add(config.name)
         output.extend(generate_config_entries(config, os=LINUX, python_version=LATEST_PYTHON_VERSION))
-    for os in [LINUX, MACOS, WINDOWS]:
-        for python_version in ALL_PYTHON_VERSIONS:
-            if os == LINUX and python_version == LATEST_PYTHON_VERSION:
-                continue
-            output.extend(generate_config_entries(xbrl_2_1, os=os, python_version=python_version))
-    for os in [MACOS, WINDOWS]:
-        output.extend(generate_config_entries(efm_current, os=os, python_version=LATEST_PYTHON_VERSION, minimal=True))
+    if not _skip_config(xbrl_2_1.name, patterns):
+        for os in [LINUX, MACOS, WINDOWS]:
+            for python_version in ALL_PYTHON_VERSIONS:
+                if os == LINUX and python_version == LATEST_PYTHON_VERSION:
+                    continue
+                output.extend(generate_config_entries(xbrl_2_1, os=os, python_version=python_version))
+    if not _skip_config(efm_current.name, patterns):
+        for os in [MACOS, WINDOWS]:
+            output.extend(generate_config_entries(efm_current, os=os, python_version=LATEST_PYTHON_VERSION, minimal=True))
 
     json.dump(output, sys.stdout, indent=4)
     print()
