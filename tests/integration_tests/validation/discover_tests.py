@@ -119,6 +119,7 @@ def _get_pr_body_filters() -> list[str]:
         return re.findall(r'CONFORMANCE_SUITE_FILTER\((.*)\)', body)
 
 
+
 def main() -> None:
     patterns = _get_pr_body_filters()
     if patterns:
