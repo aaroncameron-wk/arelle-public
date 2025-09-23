@@ -7,8 +7,11 @@ from typing import Any, Iterable
 
 from arelle import XbrlConst, ValidateDuplicateFacts
 from arelle.LinkbaseType import LinkbaseType
+from arelle.ModelValue import QName, qname
+from arelle.ModelXbrl import ModelXbrl
 from arelle.ValidateDuplicateFacts import DuplicateType
 from arelle.ValidateXbrl import ValidateXbrl
+from arelle.XmlValidateConst import VALID
 from arelle.typing import TypeGetText
 from arelle.utils.PluginHooks import ValidationHook
 from arelle.utils.validate.Decorator import validation
@@ -79,42 +82,55 @@ def rule_balances(
 
 
 @validation(
-    hook=ValidationHook.XBRL_FINALLY,
+    hook=ValidationHook.COMPLETE,
     disclosureSystems=[DISCLOSURE_SYSTEM_EDINET],
 )
 def rule_EC1057E(
-        pluginData: PluginValidationDataExtension,
-        val: ValidateXbrl,
+        pluginData: ControllerPluginData,
+        cntlr: Cntlr,
+        fileSource: FileSource,
         *args: Any,
         **kwargs: Any,
 ) -> Iterable[Validation]:
     """
     EDINET.EC1057E: The submission date on the cover page has not been filled in.
-    Ensure that there is a nonnil value disclosed for FilingDateCoverPage
-    Note: This rule is only applicable to the public documents.
+    Ensure that there is a nonnil value disclosed for FilingDateCoverPage.
     """
-    facts = [
-        fact
-        for qname in (
-            pluginData.jpcrpEsrFilingDateCoverPageQn,
-            pluginData.jpcrpFilingDateCoverPageQn,
-            pluginData.jpspsFilingDateCoverPageQn
-        )
-        for fact in pluginData.iterValidNonNilFacts(val.modelXbrl, qname)
-    ]
-    for modelDocument in pluginData.iterCoverPages(val.modelXbrl):
-        if any(fact.modelDocument == modelDocument for fact in facts):
+    # TODO: Temporarily decoupling this validation from cover pages for testing purposes.
+
+    jpcrpEsrNamespace = "http://disclosure.edinet-fsa.go.jp/taxonomy/jpcrp-esr/2024-11-01/jpcrp-esr_cor"
+    jpcrpNamespace = 'http://disclosure.edinet-fsa.go.jp/taxonomy/jpcrp/2024-11-01/jpcrp_cor'
+    jpspsNamespace = 'http://disclosure.edinet-fsa.go.jp/taxonomy/jpsps/2024-11-01/jpsps_cor'
+    jpcrpEsrFilingDateCoverPageQn = qname(jpcrpEsrNamespace, 'FilingDateCoverPage')
+    jpcrpFilingDateCoverPageQn = qname(jpcrpNamespace, 'FilingDateCoverPage')
+    jpspsFilingDateCoverPageQn = qname(jpspsNamespace, 'FilingDateCoverPage')
+
+    def hasValidNonNilFact(modelXbrl: ModelXbrl, qname: QName) -> bool:
+        for fact in modelXbrl.factsByQname.get(qname, set()):
+            if fact.xValid >= VALID and not fact.isNil:
+                return True
+        return False
+
+    factFound = False
+    for modelXbrl in cntlr.modelManager.loadedModelXbrls:
+        if not hasattr(modelXbrl, "ixdsDocUrls"):
             continue
-        if not (pluginData.hasValidNonNilFact(val.modelXbrl, pluginData.jpcrpEsrFilingDateCoverPageQn)
-                or pluginData.hasValidNonNilFact(val.modelXbrl, pluginData.jpcrpFilingDateCoverPageQn)
-                or pluginData.hasValidNonNilFact(val.modelXbrl, pluginData.jpspsFilingDateCoverPageQn)):
-            yield Validation.error(
-                codes='EDINET.EC1057E',
-                msg=_("There is no submission date ('【提出日】') on the cover page. "
-                      "File name: '%(file)s'. "
-                      "Please add '【提出日】' to the relevant file."),
-                file=modelDocument.basename,
-            )
+        manifestInstance = pluginData.matchManifestInstance(modelXbrl.ixdsDocUrls)
+        if manifestInstance is None:
+            continue
+        if manifestInstance.type == "AuditDoc":
+            continue
+        if (hasValidNonNilFact(modelXbrl, jpcrpEsrFilingDateCoverPageQn)
+                or hasValidNonNilFact(modelXbrl, jpcrpFilingDateCoverPageQn)
+                or hasValidNonNilFact(modelXbrl, jpspsFilingDateCoverPageQn)):
+            factFound = True
+            break
+    if not factFound:
+        yield Validation.error(
+            codes='EDINET.EC1057E',
+            msg=_("There is no submission date ('【提出日】'). "
+                  "Please add '【提出日】' to the relevant instance."),
+        )
 
 
 @validation(
