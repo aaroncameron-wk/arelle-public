@@ -20,6 +20,7 @@ from arelle.utils.validate.Validation import Validation
 from ..Constants import AccountingStandard
 from ..DeiRequirements import DeiItemStatus
 from ..DisclosureSystems import (DISCLOSURE_SYSTEM_EDINET)
+from ..FormType import FormType
 from ..PluginValidationDataExtension import PluginValidationDataExtension
 from ..ReportFolderType import ReportFolderType
 from ..Statement import StatementType
@@ -556,12 +557,13 @@ def rule_EC8075W(
     EDINET.EC8075W: The percentage of female executives has not been tagged in detail. Ensure that there is
     a nonnil value disclosed for jpcrp_cor:RatioOfFemaleDirectorsAndOtherOfficers.
     """
-    if pluginData.isCorporateForm(val.modelXbrl):
-        if not pluginData.hasValidNonNilFact(val.modelXbrl, pluginData.ratioOfFemaleDirectorsAndOtherOfficersQn):
-            yield Validation.warning(
-                codes='EDINET.EC8075W',
-                msg=_("The percentage of female executives has not been tagged in detail."),
-                )
+    if not pluginData.isCorporateForm(val.modelXbrl):
+        return
+    if not pluginData.hasValidNonNilFact(val.modelXbrl, pluginData.ratioOfFemaleDirectorsAndOtherOfficersQn):
+        yield Validation.warning(
+            codes='EDINET.EC8075W',
+            msg=_("The percentage of female executives has not been tagged in detail."),
+            )
 
 
 @validation(

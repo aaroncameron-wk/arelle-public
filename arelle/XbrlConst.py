@@ -140,6 +140,7 @@ qnXlResourceType = qname("{http://www.xbrl.org/2003/XLink}xl:resourceType")
 qnXlArcType = qname("{http://www.xbrl.org/2003/XLink}xl:arcType")
 xhtml = "http://www.w3.org/1999/xhtml"
 qnXhtmlMeta = qname("{http://www.w3.org/1999/xhtml}meta")
+qnXhtmlTable = qname("{http://www.w3.org/1999/xhtml}table")
 ixbrl = "http://www.xbrl.org/2008/inlineXBRL"
 ixbrl11 = "http://www.xbrl.org/2013/inlineXBRL"
 ixbrlAll = {ixbrl, ixbrl11}

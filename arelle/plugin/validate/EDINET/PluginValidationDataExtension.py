@@ -16,6 +16,7 @@ from typing import Callable, Hashable, Iterable, cast
 import os
 import regex
 
+from arelle import XbrlConst
 from arelle.LinkbaseType import LinkbaseType
 from arelle.ModelDocument import Type as ModelDocumentType, ModelDocument, load as modelDocumentLoad
 from arelle.ModelDtsObject import ModelConcept
@@ -255,11 +256,44 @@ class PluginValidationDataExtension(PluginData):
 
     @lru_cache(1)
     def isCorporateForm(self, modelXbrl: ModelXbrl) -> bool:
+        """
+        Determines if a filing meets the criteria explained by ※1 of 4-2-3 in
+        Validation Guidelines. Translated below:
+
+        The following forms of the Cabinet Office Ordinance on Disclosure of Corporate
+              Information, etc. are applicable.
+          * Form 4 of No. 2, Form 7 of No. 2
+          * Forms 3 and 4 (Only those submitted by listed companies. Listed companies
+              are determined based on the content tagged with the
+              IssuedSharesTotalNumberOfSharesEtcTextBlock element. However, if a
+              company is determined to be listed despite being unlisted, a critical
+              warning or alert will be displayed, but no action is required.)
+        :param modelXbrl:
+        :return:
+        """
         formTypes = self.getFormTypes(modelXbrl)
-        return any(
+        if any(
             formType.isCorporateForm
             for formType in formTypes
-        )
+        ):
+            return True
+        if any(
+            formType.isStockReport
+            for formType in formTypes
+        ):
+            textBlockQname = self.qname('jpcrp_cor', 'IssuedSharesTotalNumberOfSharesEtcTextBlock')
+            for fact in self.iterValidNonNilFacts(modelXbrl, textBlockQname):
+                # Documentation does not explain exactly how the fact value is used
+                # to classify a listed company. It notes that false positives may
+                # happen and can be ignored, so an approximate check seems acceptable
+                # in absence of clearer documentation.
+                # In samples, a consistent difference between values with and without
+                # meaningful data in the text block is a <table> element, so that's
+                # what we will check for here.
+                if any(True for __ in fact.iterdescendants(XbrlConst.qnXhtmlTable.clarkNotation)):
+                    return True
+        return False
+
 
     def isCorporateReport(self, modelXbrl: ModelXbrl) -> bool:
         return self.jpcrpNamespace in modelXbrl.namespaceDocs

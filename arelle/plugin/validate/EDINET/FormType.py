@@ -73,7 +73,6 @@ class FormType(Enum):
 CORPORATE_FORMS =frozenset([
     FormType.FORM_2_4,
     FormType.FORM_2_7,
-    FormType.FORM_3,
 ])
 STOCK_REPORT_FORMS = frozenset([
     FormType.FORM_3,
