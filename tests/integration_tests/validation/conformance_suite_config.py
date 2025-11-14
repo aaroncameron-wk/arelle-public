@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from typing import Literal, Any
+from typing import Literal, Any, Callable
 
 from tests.integration_tests.github import OS_CORES
 
@@ -212,6 +212,7 @@ class ConformanceSuiteConfig:
     expected_missing_testcases: frozenset[str] = frozenset()
     membership_url: str | None = None
     plugins: frozenset[str] = frozenset()
+    preprocessing_func: Callable[[ConformanceSuiteConfig], None] | None = None
     shards: int = 1
     strict_testcase_index: bool = True
     supports_test_engine: bool = True
