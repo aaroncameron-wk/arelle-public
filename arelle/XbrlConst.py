@@ -664,6 +664,11 @@ errMsgPrefixNS = {  # err prefixes which are not declared, such as XPath's "err"
     "xmlSchema": xdtSchemaErrorNS,
     "utre": "http://www.xbrl.org/2009/utr/errors",
 }
+errMsgNamespaceLocalNameMap = {
+    xdtSchemaErrorNS: {
+        "valueError": "XmlSchemaError",
+    }
+}
 
 # Filing Indicators
 qnEuFiTuple = qname("{http://www.eurofiling.info/xbrl/ext/filing-indicators}ef-find:fIndicators")

@@ -50,6 +50,7 @@ class TestcaseConstraint:
                 return True
         prefix, sep, localName = code.partition(':')
         namespaceUri = XbrlConst.errMsgPrefixNS.get(prefix)
+        localName = XbrlConst.errMsgNamespaceLocalNameMap.get(namespaceUri, {}).get(localName, localName)
         qname = QName(prefix, namespaceUri, localName)
         return self.compareQname(qname)
 
