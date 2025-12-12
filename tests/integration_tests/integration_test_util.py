@@ -173,7 +173,6 @@ def get_test_engine_data(
         test_engine_options: TestEngineOptions,
         expected_additional_testcase_errors: dict[str, dict[str, int]],
         expected_failure_ids: frozenset[str] = frozenset(),
-        expected_model_errors: frozenset[str] = frozenset(),
         required_locale_by_ids: dict[str, re.Pattern[str]] | None = None,
         strict_testcase_index: bool = True,
 ) -> list[ParameterSet]:
@@ -182,7 +181,6 @@ def get_test_engine_data(
 
     :param args: The args to be parsed by arelle in order to correctly produce the desired result set
     :param expected_failure_ids: The set of string test IDs that are expected to fail
-    :param expected_model_errors: The set of error codes expected to be in the ModelXbrl errors
     :param required_locale_by_ids: The dict of IDs for tests which require a system locale matching a regex pattern.
     :param strict_testcase_index: Don't allow IOerrors when loading the testcase index
     :return: A list of PyTest Params that can be used to run a parameterized pytest function

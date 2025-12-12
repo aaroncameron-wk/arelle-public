@@ -407,7 +407,6 @@ def get_test_engine_test_results_with_shards(
         kws = dict(
             expected_additional_testcase_errors=config.expected_additional_testcase_errors,
             expected_failure_ids=expected_failure_ids,
-            expected_model_errors=config.expected_model_errors,
             required_locale_by_ids=config.required_locale_by_ids,
             strict_testcase_index=config.strict_testcase_index,
         )
@@ -472,7 +471,6 @@ def get_test_engine_test_results_without_shards(
             ),
             expected_additional_testcase_errors=config.expected_additional_testcase_errors,
             expected_failure_ids=config.expected_failure_ids,
-            expected_model_errors=config.expected_model_errors,
             required_locale_by_ids=config.required_locale_by_ids,
             strict_testcase_index=config.strict_testcase_index,
         )
