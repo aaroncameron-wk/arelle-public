@@ -215,7 +215,7 @@ class ConformanceSuiteConfig:
     preprocessing_func: Callable[[ConformanceSuiteConfig], None] | None = None
     shards: int = 1
     strict_testcase_index: bool = True
-    supports_test_engine: bool = True
+    supports_test_engine: bool = False
     runtime_options: dict[str, Any] = field(default_factory=dict)
     url_replace: str | None = None
     required_locale_by_ids: dict[str, re.Pattern[str]] = field(default_factory=dict)

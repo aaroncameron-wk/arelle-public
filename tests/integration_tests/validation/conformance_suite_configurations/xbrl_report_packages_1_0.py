@@ -5,17 +5,25 @@ from tests.integration_tests.validation.conformance_suite_config import (
     ConformanceSuiteConfig,
 )
 
+ZIP_PATH = Path("report-package-conformance.zip")
+EXTRACTED_PATH = Path(ZIP_PATH.stem)
 config = ConformanceSuiteConfig(
     args=[
         "--reportPackage"
     ],
     assets=[
-        ConformanceSuiteAssetConfig.conformance_suite(
-            Path("report-package-conformance.zip"),
+        ConformanceSuiteAssetConfig.nested_conformance_suite(
+            ZIP_PATH,
+            EXTRACTED_PATH,
+            entry_point_root=EXTRACTED_PATH,
             entry_point=Path("report-package-conformance/index.csv"),
         ),
     ],
     expected_additional_testcase_errors={f"report-package-conformance/index.csv:{s}": val for s, val in {
+        "V-000-invalid-zip": {
+            "FileSourceError": 1,
+            "xmlSchema:syntax": 1,
+        },
         # "Empty" iXBRL docs are missing schema required elements.
         "V-301-xbri-with-single-ixds": {
             # There are two documents in the package, empty1.xhtml and empty2.xhtml,
@@ -52,4 +60,5 @@ config = ConformanceSuiteConfig(
     runtime_options={
         'reportPackage': True,
     },
+    test_case_result_options='match-any', # Per README.md included in conformance suite.
 )
