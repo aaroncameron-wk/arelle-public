@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from arelle import PluginManager
+from arelle import PluginManager, PackageManager
 from arelle.packages.report.ReportPackageValidator import ReportPackageValidator
 
 if TYPE_CHECKING:
@@ -37,3 +37,7 @@ class ValidateFileSource:
                     )
                     if errors is not None:
                         errors.append(code)
+            # Automatically validate a report package as a taxonomy package if a
+            # taxonomy package metadata file exists.
+            if len(self._filesource.taxonomyPackageMetadataFiles) > 0:
+                PackageManager.validateTaxonomyPackage(self._cntrl, self._filesource, errors=errors)

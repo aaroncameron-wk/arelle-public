@@ -82,7 +82,7 @@ def _parseFile(cntlr, parser, filepath, file, schemaUrl):
         cntlr.error(
             codes="tpe:workingOffline",
             msg=_("File could not be validated against the schema (%(schemaUrl)s) because the schema was not "
-                         "found in the cache and Arelle is configured to work offline."),
+                  "found in the cache and Arelle is configured to work offline."),
             schemaUrl=schemaUrl,
             file=filepath
         )
@@ -306,7 +306,7 @@ def _parseCatalog(
             msg=_("Catalog file syntax error %(error)s"),
             fileSource=filesource,
             error=str(err),
-                        file=os.path.basename(catalogFile),
+            file=os.path.basename(catalogFile),
         )
         errors.append("tpe:invalidCatalogFile")
     except ArchiveFileIOError:
@@ -339,7 +339,7 @@ def _parseCatalog(
                             msg=_("Package catalog duplicate rewrite start string %(rewriteStartString)s"),
                             fileSource=filesource,
                             rewriteStartString=prefixValue,
-                                    file=os.path.basename(catalogFile),
+                            file=os.path.basename(catalogFile),
                         )
                         errors.append("tpe:multipleRewriteURIsForStartString")
 
@@ -548,7 +548,7 @@ def packageInfo(cntlr, URL, reload=False, packageManifestName=None, errors=[]):
                     codes="tpe:invalidArchiveFormat",
                     msg=_("Taxonomy package is not a zip file."),
                     fileSource=filesource,
-                               file=os.path.basename(packageFilename),
+                    file=os.path.basename(packageFilename),
                 )
                 errors.append("tpe:invalidArchiveFormat")
                 assert isinstance(filesource.url, str)
@@ -581,7 +581,7 @@ def packageInfo(cntlr, URL, reload=False, packageManifestName=None, errors=[]):
                                 msg=_("Package mapping duplicate rewrite start string %(rewriteStartString)s"),
                                 fileSource=filesource,
                                 rewriteStartString=prefix,
-                                           file=os.path.basename(URL),
+                                file=os.path.basename(URL),
                             )
                             errors.append("arelle.packageDuplicateMapping")
             if not parsedPackage:
@@ -638,11 +638,11 @@ def rebuildRemappings(cntlr):
                     codes="tpe:packageRewriteOverlap",
                     level='WARNING',
                     msg=_("Packages overlap the same rewrite start string %(rewriteStartString)s")
-                               if _prefix == _prefix2 else
-                               _("Packages overlap rewrite start strings %(rewriteStartString)s and %(rewriteStartString2)s"),
+                        if _prefix == _prefix2 else
+                        _("Packages overlap rewrite start strings %(rewriteStartString)s and %(rewriteStartString2)s"),
                     rewriteStartString=_prefix,
                     rewriteStartString2=_prefix2,
-                               file=(_url1, _url2),
+                    file=(_url1, _url2),
                 )
 
 
