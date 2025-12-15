@@ -19,7 +19,7 @@ class ValidateFileSource:
         self._cntrl = cntrl
         self._filesource = filesource
 
-    def validate(self, forceValidateAsReportPackages: bool = False, errors: list[str] | None = None) -> None:
+    def validate(self, forceValidateAsReportPackages: bool = False, forceValidateAsTaxonomyPackage: bool = False, errors: list[str] | None = None) -> None:
         for pluginXbrlMethod in PluginManager.pluginClassMethods("Validate.FileSource"):
             pluginXbrlMethod(self._cntrl, self._filesource)
 
@@ -39,5 +39,5 @@ class ValidateFileSource:
                         errors.append(code)
             # Automatically validate a report package as a taxonomy package if a
             # taxonomy package metadata file exists.
-            if len(self._filesource.taxonomyPackageMetadataFiles) > 0:
+        if forceValidateAsTaxonomyPackage or self._filesource.isTaxonomyPackage:
                 PackageManager.validateTaxonomyPackage(self._cntrl, self._filesource, errors=errors)
