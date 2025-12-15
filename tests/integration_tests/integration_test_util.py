@@ -224,6 +224,7 @@ def get_test_engine_data(
                 message = ',\n'.join([
                     str(e)
                     for e in test_case_result.constraintResults
+                    if e.diff != 0
                 ])
                 # Arelle adds message code frequencies to the end, but conformance suites usually don't.
                 # Skip assertion results dictionaries.

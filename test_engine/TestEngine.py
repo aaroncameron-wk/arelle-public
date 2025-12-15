@@ -414,13 +414,33 @@ def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[Actu
         results.append(actualError)
     return results, blockedCodes
 
+def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dict[str | QName, int] ) -> dict[str | QName, int]:
+    diff = {}
+    for constraint in testcaseConstraintSet.constraints:
+        matchCount = 0
+        for actualError, count in list(actualErrorCounts.items()):
+            if (
+                    (isinstance(actualError, QName) and constraint.compareQname(actualError)) or
+                    (isinstance(actualError, str) and constraint.compareCode(actualError))
+            ):
+                if constraint.max is not None and count > constraint.max:
+                    count = constraint.max
+                matchCount += count
+                actualErrorCounts[actualError] -= count
+        if constraint.min is not None and matchCount < constraint.min:
+            diff[constraint.qname or constraint.pattern] = matchCount - constraint.min
+        elif constraint.max is not None and matchCount > constraint.max:
+            diff[constraint.qname or constraint.pattern] = matchCount - constraint.max
+        else:
+            diff[constraint.qname or constraint.pattern] = 0
+    return diff
+
 def buildResult(
     testcaseVariation: TestcaseVariation,
     actualErrors: list[ActualError],
     duration_seconds: float,
     additionalConstraints: list[tuple[str, list[TestcaseConstraint]]],
 ) -> TestcaseResult:
-    diff = {}
     actualErrorCounts = defaultdict(int)
     actualErrors, blockedErrors = blockCodes(actualErrors, testcaseVariation.blockedCodePattern)
     for actualError in actualErrors:
@@ -445,35 +465,16 @@ def buildResult(
         constraints=_normalizedConstraints(appliedConstraints),
         matchAll=testcaseVariation.testcaseConstraintSet.matchAll
     )
-    anyPassed = False
-    for constraint in appliedConstraintSet.constraints:
-        matchCount = 0
-        for actualError, count in list(actualErrorCounts.items()):
-            if (
-                    (isinstance(actualError, QName) and constraint.compareQname(actualError)) or
-                    (isinstance(actualError, str) and constraint.compareCode(actualError))
-            ):
-                if constraint.max is not None and count > constraint.max:
-                    count = constraint.max
-                matchCount += count
-                actualErrorCounts[actualError] -= count
-        if constraint.min is not None and matchCount < constraint.min:
-            diff[constraint.qname or constraint.pattern] = matchCount - constraint.min
-        elif constraint.max is not None and matchCount > constraint.max:
-            diff[constraint.qname or constraint.pattern] = matchCount - constraint.max
-        else:
-            anyPassed = True
+    diff = getDiff(appliedConstraintSet, actualErrorCounts)
     for actualError, count in actualErrorCounts.items():
         if count == 0:
             continue
         diff[actualError] = count
-    if appliedConstraintSet.matchAll: #TODO: matchAll/Any?
+    if appliedConstraintSet.matchAll or len(appliedConstraintSet.constraints) == 0: #TODO: matchAll/Any?
+        # Match any vs. all operate the same when there are no constraints (valid testcase).
         passed = all(d == 0 for d in diff.values())
     else:
-        if len(appliedConstraintSet.constraints) > 0:
-            passed = anyPassed
-        else:
-            passed = True
+        passed = any(d == 0 for d in diff.values())
     constraintResults = [
         TestcaseConstraintResult(
             code=k,
