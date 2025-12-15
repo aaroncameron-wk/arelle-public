@@ -28,11 +28,12 @@ class ValidateFileSource:
             for val in rpValidator.validate():
                 codes = [val.codes] if isinstance(val.codes, str) else val.codes
                 for code in codes:
-                    self._cntrl.addToLog(
-                        messageCode=code,
-                        message=val.msg,
-                        messageArgs=val.args,
+                    self._cntrl.error(
                         level=val.level.name,
+                        codes=code,
+                        msg=val.msg,
+                        fileSource=self._filesource,
+                        **val.args
                     )
-                if errors is not None:
-                    errors.append(code)
+                    if errors is not None:
+                        errors.append(code)
