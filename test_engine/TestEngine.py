@@ -101,6 +101,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def normPath(path: Path) -> str:
+    pathStr = str(path)
+    if pathStr.startswith("file:\\"):
+        pathStr = pathStr[6:]
+    return pathStr
+
+
 def buildEntrypointUris(uris: list[Path]) -> list[str]:
     uris = [
         uri.relative_to(Path.cwd()) if uri.is_relative_to(Path.cwd()) else uri
@@ -108,9 +115,9 @@ def buildEntrypointUris(uris: list[Path]) -> list[str]:
     ]
     if len(uris) > 1:
         if all(uri.suffix in ('.htm', '.html', '.xhtml') for uri in uris):
-            docsetSurrogatePath = str(uris[0].parent) + IXDS_SURROGATE
-            return [docsetSurrogatePath + IXDS_DOC_SEPARATOR.join(str(uri) for uri in uris)]
-    return [str(uri) for uri in uris]
+            docsetSurrogatePath = normPath(uris[0].parent) + IXDS_SURROGATE
+            return [docsetSurrogatePath + IXDS_DOC_SEPARATOR.join(normPath(uri) for uri in uris)]
+    return [normPath(uri) for uri in uris]
 
 
 def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> list[TestcaseVariation]:
