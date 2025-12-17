@@ -43,6 +43,9 @@ config = ConformanceSuiteConfig(
     base_taxonomy_validation='none',
     disclosure_system='esef-2023',
     expected_additional_testcase_errors={f'tests/inline_xbrl/{s}': val for s, val in {
+        'G3-1-2/index.xml:TC2_valid': {
+            'ESEF.3.2.2.domainMemberWrongDataType': 1,
+        },
         'RTS_Annex_IV_Par_12_G2-2-4/index.xml:TC5_valid': {
             'message:tech_duplicated_facts1': 2,
         },
