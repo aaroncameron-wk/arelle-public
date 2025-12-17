@@ -38,6 +38,21 @@ DEFAULT_PLUGIN_OPTIONS = {
     }
 }
 
+
+def _hardcodedMatch(expected, actual):
+    # TODO: Sourced from legacy testcase variation processor. Replace with config.
+    return (
+            (expected == "EFM.6.03.04" and actual.startswith("xmlSchema:")) or
+            (expected == "EFM.6.03.05" and (actual.startswith("xmlSchema:") or actual == "EFM.5.02.01.01")) or
+            (expected == "EFM.6.04.03" and (actual.startswith("xmlSchema:") or actual.startswith("utr:") or actual.startswith("xbrl.") or actual.startswith("xlink:"))) or
+            (expected == "EFM.6.05.35" and actual.startswith("utre:")) or
+            (expected == "html:syntaxError" and actual.startswith("lxml.SCHEMA")) or
+            (expected == "vere:invalidDTSIdentifier" and actual.startswith("xbrl")) or
+            (expected.startswith("EFM.") and actual.startswith(expected)) or
+            (expected.startswith("EXG.") and actual.startswith(expected))
+    )
+
+
 def _longestCommonPrefix(values: list[str]) -> str:
     if not values:
         return ""
@@ -428,7 +443,8 @@ def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dic
         for actualError, count in list(actualErrorCounts.items()):
             if (
                     (isinstance(actualError, QName) and constraint.compareQname(actualError)) or
-                    (isinstance(actualError, str) and constraint.compareCode(actualError))
+                    (isinstance(actualError, str) and constraint.compareCode(actualError)) or
+                    (isinstance(actualError, str) and _hardcodedMatch(constraint.pattern or str(constraint.qname), actualError))
             ):
                 if constraint.max is not None and count > constraint.max:
                     count = constraint.max
