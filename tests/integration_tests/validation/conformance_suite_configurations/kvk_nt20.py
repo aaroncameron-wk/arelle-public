@@ -24,7 +24,6 @@ config = ConformanceSuiteConfig(
     expected_additional_testcase_errors={
         # Compares against today; they'll pass eventually.
         v: {
-            'NL.BR-KVK-4.07': 1,
             'message:valueAssertion_DocumentInformation_PrtDateEarlierThanCurrent1': 1,
         }
         for v in [
