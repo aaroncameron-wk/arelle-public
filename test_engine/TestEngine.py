@@ -165,44 +165,47 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                 if calcMode == 'truncate':
                     calcMode = 'truncation'
 
-                expected = testcaseVariation.expected
                 constraints = []
-                if expected == 'invalid':
-                    constraints.append(TestcaseConstraint(
-                        qname=None,
-                        pattern='',  # matches any code
-                        min=1,
-                        max=None,
-                        warnings=False,
-                        errors=True,
-                    ))
-                elif isinstance(expected, list):
-                    for e in expected:
-                        # TODO: testcase element
-                        # TODO: testGroup element
-                        # TODO: result element
-                        # TODO: assert elements
-                        # TODO: assertionTests elements
-                        if isinstance(e, QName):
-                            constraints.append(TestcaseConstraint(
-                                qname=e,
-                                pattern=None,
-                                min=1,
-                                max=None,
-                                warnings=False,
-                                errors=True,
-                            ))
-                        elif isinstance(e, str):
-                            constraints.append(TestcaseConstraint(
-                                qname=None,
-                                pattern=e,
-                                min=1,
-                                max=None,
-                                warnings=False,
-                                errors=True,
-                            ))
-                        else:
-                            raise ValueError(f"Unexpected expected error type: {type(e)}")
+                expected = testcaseVariation.expected or 'valid'
+                if not isinstance(expected, list):
+                    expected = [expected]
+                for e in expected:
+                    # TODO: testcase element
+                    # TODO: testGroup element
+                    # TODO: result element
+                    # TODO: assert elements
+                    # TODO: assertionTests elements
+                    if e == 'valid':
+                        pass
+                    elif e == 'invalid':
+                        constraints.append(TestcaseConstraint(
+                            qname=None,
+                            pattern='',  # matches any code
+                            min=1,
+                            max=None,
+                            warnings=False,
+                            errors=True,
+                        ))
+                    elif isinstance(e, QName):
+                        constraints.append(TestcaseConstraint(
+                            qname=e,
+                            pattern=None,
+                            min=1,
+                            max=None,
+                            warnings=False,
+                            errors=True,
+                        ))
+                    elif isinstance(e, str):
+                        constraints.append(TestcaseConstraint(
+                            qname=None,
+                            pattern=e,
+                            min=1,
+                            max=None,
+                            warnings=False,
+                            errors=True,
+                        ))
+                    else:
+                        raise ValueError(f"Unexpected expected error type: {type(e)}")
                 expectedWarnings = testcaseVariation.expectedWarnings or []
                 for warning in expectedWarnings:
                     if isinstance(warning, QName):
@@ -325,13 +328,10 @@ def runTestcaseVariation(
             errors.extend(model.errors)
         for error in errors:
             if isinstance(error, dict):
-                error = {
-                    k: v
-                    for k, v in error.items()
-                    if any(i > 0 for i in v)
-                }
+                # satisfiedCount, notSatisfiedCount, okCount, warningCount, errorCount = counts
+                # TODO: Support assertion logs
+                continue
             actualErrors.append(ActualError(
-                assertions=error if isinstance(error, dict) else None,
                 code=error if isinstance(error, str) else None,
                 qname=error if isinstance(error, QName) else None,
             ))
@@ -414,7 +414,7 @@ def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[Actu
         return actualErrors, blockedCodes
     compiledPattern = regex.compile(regex.sub(r'\\(.)', r'\1', pattern))
     for actualError in actualErrors:
-        value = str(actualError.qname or actualError.code or actualError.assertions)
+        value = str(actualError.qname or actualError.code)
         if compiledPattern.match(value):
             blockedCodes[value] += 1
             continue
@@ -455,19 +455,20 @@ def buildResult(
     actualErrorCounts = defaultdict(int)
     actualErrors, blockedErrors = blockCodes(actualErrors, testcaseVariation.blockedCodePattern)
     for actualError in actualErrors:
-        if actualError.assertions is not None:
-            # TODO:  Whether or not to validate formula assertions
-            # Look into formula conformance suite:
-            #   <assertionTests
-            #          assertionID="assertion"
-            #          countSatisfied="0"
-            #          countNotSatisfied="1" />
-            if False:
-                for code, counts in actualError.assertions.items():
-                    satisfiedCount, notSatisfiedCount, okCount, warningCount, errorCount = counts
-                    actualErrorCounts[code] += notSatisfiedCount + warningCount + errorCount
-        else:
-            actualErrorCounts[actualError.qname or actualError.code] += 1
+        # if actualError.assertions is not None:
+        # #     TODO:  Whether or not to validate formula assertions
+        # #     Look into formula conformance suite:
+        # #       <assertionTests
+        # #              assertionID="assertion"
+        # #              countSatisfied="0"
+        # #              countNotSatisfied="1" />
+        #     if False:
+        #         for code, counts in actualError.assertions.items():
+        #             satisfiedCount, notSatisfiedCount, okCount, warningCount, errorCount = counts
+        #             actualErrorCounts[code] += notSatisfiedCount + warningCount + errorCount
+        # else:
+        #     actualErrorCounts[actualError.qname or actualError.code] += 1
+        actualErrorCounts[actualError.qname or actualError.code] += 1
     appliedConstraints = list(testcaseVariation.testcaseConstraintSet.constraints)
     for filter, constraints in additionalConstraints:
         if fnmatch.fnmatch(testcaseVariation.fullId, f'*{filter}'):
