@@ -241,6 +241,8 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                             warnings=True,
                             errors=False,
                         ))
+                    else:
+                        raise ValueError(f"Unexpected expected warning type: {type(e)}")
 
                 blockedCodePattern = testcaseVariation.blockedMessageCodes # restricts codes examined when provided
 

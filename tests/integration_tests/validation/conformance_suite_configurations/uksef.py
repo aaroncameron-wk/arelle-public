@@ -55,6 +55,16 @@ config = ConformanceSuiteConfig(
         package for year in [2022, 2024] for package in ESEF_PACKAGES[year]
     ],
     base_taxonomy_validation='none',
+    expected_additional_testcase_errors={f'uksef-conformance-suite/tests/FRC/{s}': val for s, val in {
+        # Invalid documentType https://xbrl.org/report-package/CR/2023-05-03/xbri
+        'FRC_09/index.xml:TC2_valid': {
+            'rpe:unsupportedReportPackageVersion': 1,
+        },
+        # Invalid documentType https://xbrl.org/report-package/CR/2023-05-03
+        'FRC_09/index.xml:TC4_valid': {
+            'rpe:unsupportedReportPackageVersion': 1,
+        },
+    }.items()},
     expected_failure_ids=frozenset({f'uksef-conformance-suite/tests/FRC/{s}' for s in [
         # FRC XBRL Tagging Guide not yet implemented.
         'FRC_01/index.xml:TC6_invalid',
