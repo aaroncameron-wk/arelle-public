@@ -440,6 +440,10 @@ def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dic
             diff[constraint.qname or constraint.pattern] = matchCount - constraint.max
         else:
             diff[constraint.qname or constraint.pattern] = 0
+    for actualError, count in actualErrorCounts.items():
+        if count == 0:
+            continue
+        diff[actualError] = count
     return diff
 
 def buildResult(
@@ -473,10 +477,6 @@ def buildResult(
         matchAll=testcaseVariation.testcaseConstraintSet.matchAll
     )
     diff = getDiff(appliedConstraintSet, actualErrorCounts)
-    for actualError, count in actualErrorCounts.items():
-        if count == 0:
-            continue
-        diff[actualError] = count
     if appliedConstraintSet.matchAll or len(appliedConstraintSet.constraints) == 0: #TODO: matchAll/Any?
         # Match any vs. all operate the same when there are no constraints (valid testcase).
         passed = all(d == 0 for d in diff.values())

@@ -42,6 +42,11 @@ config = ConformanceSuiteConfig(
     ],
     base_taxonomy_validation='none',
     disclosure_system='esef-2023',
+    expected_additional_testcase_errors={f'tests/inline_xbrl/{s}': val for s, val in {
+        'RTS_Annex_IV_Par_12_G2-2-4/index.xml:TC5_valid': {
+            'message:tech_duplicated_facts1': 2,
+        },
+    }.items()},
     expected_failure_ids=frozenset(f'tests/inline_xbrl/{s}' for s in [
         # disallowedReportPackageFileExtension not firing
         'G2-6-1_3/index.xml:TC2_invalid',

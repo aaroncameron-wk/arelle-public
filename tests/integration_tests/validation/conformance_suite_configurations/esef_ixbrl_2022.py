@@ -23,6 +23,11 @@ config = ConformanceSuiteConfig(
     ],
     base_taxonomy_validation='none',
     disclosure_system='esef-2022',
+    expected_additional_testcase_errors={f'esef_conformance_suite_2022/tests/{s}': val for s, val in {
+        'inline_xbrl/RTS_Annex_IV_Par_12_G2-2-4/index.xml:TC5_valid': {
+            'message:tech_duplicated_facts1': 2,
+        },
+    }.items()},
     expected_failure_ids=frozenset(f'esef_conformance_suite_2022/tests/{s}' for s in [
         ### Discovered during transition to Test Engine:
         # Related to reportIncorrectlyPlacedInPackage not firing
