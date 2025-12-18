@@ -261,6 +261,10 @@ def get_conformance_suite_arguments(config: ConformanceSuiteConfig, filename: st
         '--testcaseResultOptions', config.test_case_result_options,
         '--validate',
     ]
+    if config.base_taxonomy_validation:
+        args.extend(['--baseTaxonomyValidation', config.base_taxonomy_validation])
+    if config.disclosure_system:
+        args.extend(['--disclosureSystem', config.disclosure_system])
     if config.package_paths:
         args.extend(['--packages', '|'.join(sorted(p.as_posix() for p in config.package_paths))])
     if plugins:
@@ -627,7 +631,7 @@ def save_actual_results_file(config: ConformanceSuiteConfig, results: list[Param
     rows = []
     for result in results:
         testcase_id = result.id
-        actual_codes = result.values[0].get('actual')  # type: ignore[union-attr]
+        actual_codes = result.values[0].get('actual')  # type: ignore[union-attr] TODO: update for test engine
         for code in actual_codes:
             rows.append((testcase_id, code))
     output_filepath = Path(f'conf-{config.name}-actual.csv')
