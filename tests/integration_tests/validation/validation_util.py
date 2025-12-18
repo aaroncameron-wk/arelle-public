@@ -412,17 +412,10 @@ def get_test_engine_test_results_with_shards(
             strict_testcase_index=config.strict_testcase_index,
         )
         tasks.append((test_engine_options, kws))
-
-    url_context_manager: AbstractContextManager[Any]
-    if config.url_replace:
-        url_context_manager = patch('arelle.WebCache.WebCache.normalizeUrl', normalize_url_function(config))
-    else:
-        url_context_manager = nullcontext()
-    with url_context_manager:
-        results = []
-        for task in tasks:
-            task_results = get_test_engine_mp_wrapper(task)
-            results.extend(task_results)
+    results = []
+    for task in tasks:
+        task_results = get_test_engine_mp_wrapper(task)
+        results.extend(task_results)
     merged_results = {}
     for result in results:
         status = result.values[0].get('status')
@@ -454,28 +447,22 @@ def get_test_engine_test_results_without_shards(
         config=config, additional_plugins=additional_plugins,
         build_cache=build_cache, offline=offline, log_to_file=log_to_file, shard=None,
     )
-    url_context_manager: AbstractContextManager[Any]
-    if config.url_replace:
-        url_context_manager = patch('arelle.WebCache.WebCache.normalizeUrl', normalize_url_function(config))
-    else:
-        url_context_manager = nullcontext()
-    with url_context_manager:
-        return get_test_engine_data(
-            test_engine_options=TestEngineOptions(
-                additionalConstraints=_get_additional_constraints(config),
-                filters=testcase_filters,
-                indexFile=str(config.entry_point_path),
-                logDirectory=Path(f'conf-logs/{config.name}'),
-                matchAll=config.test_case_result_options == 'match-all',
-                name=config.name,
-                options=runtime_options,
-                parallel=not series,
-            ),
-            expected_additional_testcase_errors=config.expected_additional_testcase_errors,
-            expected_failure_ids=config.expected_failure_ids,
-            required_locale_by_ids=config.required_locale_by_ids,
-            strict_testcase_index=config.strict_testcase_index,
-        )
+    return get_test_engine_data(
+        test_engine_options=TestEngineOptions(
+            additionalConstraints=_get_additional_constraints(config),
+            filters=testcase_filters,
+            indexFile=str(config.entry_point_path),
+            logDirectory=Path(f'conf-logs/{config.name}'),
+            matchAll=config.test_case_result_options == 'match-all',
+            name=config.name,
+            options=runtime_options,
+            parallel=not series,
+        ),
+        expected_additional_testcase_errors=config.expected_additional_testcase_errors,
+        expected_failure_ids=config.expected_failure_ids,
+        required_locale_by_ids=config.required_locale_by_ids,
+        strict_testcase_index=config.strict_testcase_index,
+    )
 
 
 def get_conformance_suite_test_results_with_shards(
