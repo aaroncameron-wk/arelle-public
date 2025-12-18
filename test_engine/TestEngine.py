@@ -195,54 +195,49 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                         pass
                     elif e == 'invalid':
                         constraints.append(TestcaseConstraint(
-                            qname=None,
                             pattern='',  # matches any code
                             min=1,
-                            max=None,
-                            warnings=False,
                             errors=True,
                         ))
                     elif isinstance(e, QName):
                         constraints.append(TestcaseConstraint(
                             qname=e,
-                            pattern=None,
                             min=1,
-                            max=None,
-                            warnings=False,
                             errors=True,
                         ))
                     elif isinstance(e, str):
                         constraints.append(TestcaseConstraint(
-                            qname=None,
                             pattern=e,
                             min=1,
-                            max=None,
-                            warnings=False,
                             errors=True,
                         ))
                     elif isinstance(e, dict):
-                        continue # TODO: Temporary, this will create false positives
+                        constraints.append(TestcaseConstraint(
+                            assertions=e,
+                            errors=True,
+                        ))
                     else:
                         raise ValueError(f"Unexpected expected error type: {type(e)}")
+                if resultTableUri := testcaseVariation.resultTableUri is not None:
+                    constraints.append(TestcaseConstraint(
+                        tableUri=Path(resultTableUri),
+                        errors=True,
+                    ))
+
+
                 expectedWarnings = testcaseVariation.expectedWarnings or []
                 for warning in expectedWarnings:
                     if isinstance(warning, QName):
                         constraints.append(TestcaseConstraint(
                             qname=warning,
-                            pattern=None,
                             min=1,
-                            max=None,
                             warnings=True,
-                            errors=False,
                         ))
                     elif isinstance(warning, str):
                         constraints.append(TestcaseConstraint(
-                            qname=None,
                             pattern=warning,
                             min=1,
-                            max=None,
                             warnings=True,
-                            errors=False,
                         ))
                     else:
                         raise ValueError(f"Unexpected expected warning type: {type(e)}")
@@ -403,6 +398,8 @@ def _normalizedConstraints(
         key = (
             constraint.qname,
             constraint.pattern,
+            constraint.assertions,
+            constraint.tableUri,
             constraint.warnings,
             constraint.errors
         )
@@ -415,14 +412,22 @@ def _normalizedConstraints(
         )
     normalizedConstraints = [
         TestcaseConstraint(
-            qname=k[0],
-            pattern=k[1],
-            min=v[0],
-            max=v[1],
-            warnings=k[2],
-            errors=k[3],
+            qname=_qname,
+            pattern=_pattern,
+            min=_min,
+            max=_max,
+            assertions=_assertions,
+            warnings=_warnings,
+            errors=_errors,
         )
-        for k, v in normalizedConstraintsMap.items()
+        for (
+            _qname,
+            _pattern,
+            _assertions,
+            _tableUri,
+            _warnings,
+            _errors
+        ), (_min, _max) in normalizedConstraintsMap.items()
     ]
     return normalizedConstraints
 
@@ -444,6 +449,12 @@ def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[Actu
 def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dict[str | QName, int] ) -> dict[str | QName, int]:
     diff = {}
     for constraint in testcaseConstraintSet.constraints:
+        if constraint.assertions is not None:
+            diff[constraint.assertions] = 1
+            continue
+        if constraint.tableUri is not None:
+            diff[constraint.tableUri] = 1
+            continue
         matchCount = 0
         for actualError, count in list(actualErrorCounts.items()):
             if (

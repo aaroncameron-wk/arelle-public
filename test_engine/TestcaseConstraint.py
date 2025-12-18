@@ -4,6 +4,7 @@ See COPYRIGHT.md for copyright information.
 from __future__ import annotations
 from dataclasses import dataclass
 from functools import cached_property
+from pathlib import Path
 
 from arelle import XbrlConst
 from arelle.ModelValue import QName
@@ -11,12 +12,14 @@ from arelle.ModelValue import QName
 
 @dataclass(frozen=True)
 class TestcaseConstraint:
-    qname: QName | None
-    pattern: str | None
-    min: int | None
-    max: int | None
-    warnings: bool
-    errors: bool
+    qname: QName | None = None
+    pattern: str | None = None
+    min: int | None = None
+    max: int | None = None
+    assertions: dict[str, tuple[int, ...]] | None = None
+    tableUri: Path | None = None
+    warnings: bool = False
+    errors: bool = False
 
     def __str__(self):
         value = str(self.qname or self.pattern or '(any)')
