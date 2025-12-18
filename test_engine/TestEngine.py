@@ -130,7 +130,7 @@ def buildEntrypointUris(uris: list[Path]) -> list[str]:
     ]
     if len(uris) > 1:
         if all(uri.suffix in ('.htm', '.html', '.xhtml') for uri in uris):
-            docsetSurrogatePath = normPath(uris[0].parent) + IXDS_SURROGATE
+            docsetSurrogatePath = normPath(uris[0].parent) + os.sep + IXDS_SURROGATE
             return [docsetSurrogatePath + IXDS_DOC_SEPARATOR.join(normPath(uri) for uri in uris)]
     return [normPath(uri) for uri in uris]
 
