@@ -26,7 +26,7 @@ config = ConformanceSuiteConfig(
     ],
     cache_version_id='bY6OmURBAtPB4UALKzz5aeeLlMSKxN9e',
     disclosure_system='efm-pragmatic',
-    expected_failure_ids=frozenset({f"{s}" for s in {
+    expected_failure_ids=frozenset({f"conf/{s}" for s in {
         # × Missing 1 expected "EFM.6.05.08"
         "605-instance-syntax/605-08-no-unused-contexts/605-08-no-unused-contexts-testcase.xml:_002ng",
     }}),
