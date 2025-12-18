@@ -185,6 +185,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                 if not isinstance(expected, list):
                     expected = [expected]
                 for e in expected:
+                    # TODO: table element
                     # TODO: testcase element
                     # TODO: testGroup element
                     # TODO: result element
