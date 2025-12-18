@@ -332,7 +332,7 @@ def runTestcaseVariation(
     )
     runtimeOptionsJson = json.dumps({k: v for k, v in vars(runtimeOptions).items() if v is not None}, indent=4, sort_keys=True)
     with open(runtimeOptions.logFile, 'w') as f:
-        f.write(f'Running [{testcaseVariation.fullId}] with options: {runtimeOptionsJson}\n------\n')
+        f.write(f'Running [{testcaseVariation.fullId}] with options:\n{runtimeOptionsJson}\n------\n')
     with Session() as session:
         start_ts = time.perf_counter_ns()
         session.run(
@@ -568,6 +568,7 @@ if __name__ == "__main__":
         indexFile=args.index,
         logDirectory=Path(args.log_directory),
         matchAll=args.match_all,
+        name=None,
         options=json.loads(args.options),
         parallel=args.parallel,
     ))

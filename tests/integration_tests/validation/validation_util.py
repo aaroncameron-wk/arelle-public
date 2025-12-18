@@ -401,6 +401,7 @@ def get_test_engine_test_results_with_shards(
             indexFile=str(config.entry_point_path),
             logDirectory=Path(f'conf-logs/{config.name}'),
             matchAll=config.test_case_result_options == 'match-all',
+            name=config.name,
             options=runtime_options,
             parallel=not series, # "daemonic processes are not allowed to have children"
         )
@@ -466,6 +467,7 @@ def get_test_engine_test_results_without_shards(
                 indexFile=str(config.entry_point_path),
                 logDirectory=Path(f'conf-logs/{config.name}'),
                 matchAll=config.test_case_result_options == 'match-all',
+                name=config.name,
                 options=runtime_options,
                 parallel=not series,
             ),

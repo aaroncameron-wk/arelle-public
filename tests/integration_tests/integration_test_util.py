@@ -188,6 +188,7 @@ def get_test_engine_data(
     if required_locale_by_ids is None:
         required_locale_by_ids = {}
     test_case_results = TestEngine.run(test_engine_options)
+    id_prefix = f'{test_engine_options.name}::' if test_engine_options.name else ''
     try:
         system_locale = locale.setlocale(locale.LC_CTYPE)
         results: list[ParameterSet] = []
@@ -240,7 +241,7 @@ def get_test_engine_data(
                         'duration': test_case_result.duration_seconds,
                         'message': message,
                     },
-                    id=test_case_result.testcaseVariation.shortName,
+                    id=f'{id_prefix}{test_case_result.testcaseVariation.shortName}',
                     marks=marks,
                 )
                 results.append(param)

@@ -16,5 +16,6 @@ class TestEngineOptions:
     indexFile: str
     logDirectory: Path
     matchAll: bool
+    name: str | None
     options: dict[str, Any]
     parallel: bool
