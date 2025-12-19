@@ -490,6 +490,9 @@ def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dic
     for actualKey, count in actualErrorCounts.items():
         if count == 0:
             continue
+        actualError, level = actualKey
+        if level == ErrorLevel.SATISIFED:
+            continue
         diff[actualKey] = count
     return diff
 
