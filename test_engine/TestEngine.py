@@ -18,7 +18,7 @@ from arelle.RuntimeOptions import RuntimeOptions
 from arelle.api.Session import Session
 from arelle.logging.handlers.StructuredMessageLogHandler import StructuredMessageLogHandler
 from arelle.plugin.inlineXbrlDocumentSet import IXDS_SURROGATE, IXDS_DOC_SEPARATOR
-from test_engine.ActualError import ActualError
+from test_engine.ActualError import ActualError, ErrorLevel
 from test_engine.TestEngineOptions import TestEngineOptions
 from test_engine.TestcaseConstraint import TestcaseConstraint
 from test_engine.TestcaseConstraintResult import TestcaseConstraintResult
@@ -197,31 +197,35 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                         constraints.append(TestcaseConstraint(
                             pattern='',  # matches any code
                             min=1,
-                            errors=True,
                         ))
                     elif isinstance(e, QName):
                         constraints.append(TestcaseConstraint(
                             qname=e,
                             min=1,
-                            errors=True,
                         ))
                     elif isinstance(e, str):
                         constraints.append(TestcaseConstraint(
                             pattern=e,
                             min=1,
-                            errors=True,
                         ))
                     elif isinstance(e, dict):
-                        constraints.append(TestcaseConstraint(
-                            assertions=e,
-                            errors=True,
-                        ))
+                        for pattern, assertions in e.items():
+                            satisfiedCount, notSatisfiedCount = assertions
+                            countMap = {
+                                ErrorLevel.SATISIFED: satisfiedCount,
+                                ErrorLevel.NOT_SATISFIED: notSatisfiedCount,
+                            }
+                            for level, count in countMap.items():
+                                for i in range(0, count):
+                                    constraints.append(TestcaseConstraint(
+                                        pattern=pattern,
+                                        level=level,
+                                    ))
                     else:
                         raise ValueError(f"Unexpected expected error type: {type(e)}")
-                if resultTableUri := testcaseVariation.resultTableUri is not None:
+                if (resultTableUri := testcaseVariation.resultTableUri) is not None:
                     constraints.append(TestcaseConstraint(
                         tableUri=Path(resultTableUri),
-                        errors=True,
                     ))
 
 
@@ -231,13 +235,13 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                         constraints.append(TestcaseConstraint(
                             qname=warning,
                             min=1,
-                            warnings=True,
+                            level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
                         ))
                     elif isinstance(warning, str):
                         constraints.append(TestcaseConstraint(
                             pattern=warning,
                             min=1,
-                            warnings=True,
+                            level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
                         ))
                     else:
                         raise ValueError(f"Unexpected expected warning type: {type(e)}")
@@ -343,12 +347,27 @@ def runTestcaseVariation(
             errors.extend(model.errors)
         for error in errors:
             if isinstance(error, dict):
-                # satisfiedCount, notSatisfiedCount, okCount, warningCount, errorCount = counts
-                # TODO: Support assertion logs
+                for code, counts in error.items():
+                    satisfiedCount, notSatisfiedCount, okCount, warningCount, errorCount = counts
+                    countMap = {
+                        ErrorLevel.SATISIFED: satisfiedCount,
+                        ErrorLevel.NOT_SATISFIED: notSatisfiedCount,
+                        ErrorLevel.OK: okCount,
+                        ErrorLevel.WARNING: warningCount,
+                        ErrorLevel.ERROR: errorCount
+                    }
+                    for level, count in countMap.items():
+                        for i in range(0, count):
+                            actualErrors.append(ActualError(
+                                code=code,
+                                qname=None,
+                                level=level,
+                            ))
                 continue
             actualErrors.append(ActualError(
                 code=error if isinstance(error, str) else None,
                 qname=error if isinstance(error, QName) else None,
+                level=ErrorLevel.ERROR,
             ))
         result = buildResult(
             testcaseVariation=testcaseVariation,
@@ -398,10 +417,8 @@ def _normalizedConstraints(
         key = (
             constraint.qname,
             constraint.pattern,
-            constraint.assertions,
             constraint.tableUri,
-            constraint.warnings,
-            constraint.errors
+            constraint.level,
         )
         if key not in normalizedConstraintsMap:
             normalizedConstraintsMap[key] = (None, None)
@@ -416,17 +433,14 @@ def _normalizedConstraints(
             pattern=_pattern,
             min=_min,
             max=_max,
-            assertions=_assertions,
-            warnings=_warnings,
-            errors=_errors,
+            tableUri=_tableUri,
+            level=_level,
         )
         for (
             _qname,
             _pattern,
-            _assertions,
             _tableUri,
-            _warnings,
-            _errors
+            _level,
         ), (_min, _max) in normalizedConstraintsMap.items()
     ]
     return normalizedConstraints
@@ -446,17 +460,18 @@ def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[Actu
         results.append(actualError)
     return results, blockedCodes
 
-def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dict[str | QName, int] ) -> dict[str | QName, int]:
+def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dict[tuple[str | QName, ErrorLevel], int] ) -> dict[tuple[str | QName, ErrorLevel], int]:
     diff = {}
     for constraint in testcaseConstraintSet.constraints:
-        if constraint.assertions is not None:
-            diff[constraint.assertions] = 1
-            continue
+        constraintKey = (constraint.qname or constraint.pattern or str(constraint.tableUri), constraint.level)
         if constraint.tableUri is not None:
-            diff[constraint.tableUri] = 1
+            diff[constraintKey] = 1
             continue
         matchCount = 0
-        for actualError, count in list(actualErrorCounts.items()):
+        for actualKey, count in actualErrorCounts.items():
+            actualError, level = actualKey
+            if level != constraint.level:
+                continue
             if (
                     (isinstance(actualError, QName) and constraint.compareQname(actualError)) or
                     (isinstance(actualError, str) and constraint.compareCode(actualError)) or
@@ -465,17 +480,17 @@ def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dic
                 if constraint.max is not None and count > constraint.max:
                     count = constraint.max
                 matchCount += count
-                actualErrorCounts[actualError] -= count
+                actualErrorCounts[actualKey] -= count
         if constraint.min is not None and matchCount < constraint.min:
-            diff[constraint.qname or constraint.pattern] = matchCount - constraint.min
+            diff[constraintKey] = matchCount - constraint.min
         elif constraint.max is not None and matchCount > constraint.max:
-            diff[constraint.qname or constraint.pattern] = matchCount - constraint.max
+            diff[constraintKey] = matchCount - constraint.max
         else:
-            diff[constraint.qname or constraint.pattern] = 0
-    for actualError, count in actualErrorCounts.items():
+            diff[constraintKey] = 0
+    for actualKey, count in actualErrorCounts.items():
         if count == 0:
             continue
-        diff[actualError] = count
+        diff[actualKey] = count
     return diff
 
 def buildResult(
@@ -487,20 +502,7 @@ def buildResult(
     actualErrorCounts = defaultdict(int)
     actualErrors, blockedErrors = blockCodes(actualErrors, testcaseVariation.blockedCodePattern)
     for actualError in actualErrors:
-        # if actualError.assertions is not None:
-        # #     TODO:  Whether or not to validate formula assertions
-        # #     Look into formula conformance suite:
-        # #       <assertionTests
-        # #              assertionID="assertion"
-        # #              countSatisfied="0"
-        # #              countNotSatisfied="1" />
-        #     if False:
-        #         for code, counts in actualError.assertions.items():
-        #             satisfiedCount, notSatisfiedCount, okCount, warningCount, errorCount = counts
-        #             actualErrorCounts[code] += notSatisfiedCount + warningCount + errorCount
-        # else:
-        #     actualErrorCounts[actualError.qname or actualError.code] += 1
-        actualErrorCounts[actualError.qname or actualError.code] += 1
+        actualErrorCounts[(actualError.qname or actualError.code, actualError.level)] += 1
     appliedConstraints = list(testcaseVariation.testcaseConstraintSet.constraints)
     for filter, constraints in additionalConstraints:
         if fnmatch.fnmatch(testcaseVariation.fullId, f'*{filter}'):

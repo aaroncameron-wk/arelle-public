@@ -340,8 +340,6 @@ def _get_additional_constraints(config: ConformanceSuiteConfig) -> list[tuple[st
                         pattern=code,
                         min=count,
                         max=count,
-                        warnings=False,
-                        errors=True,
                     )
                     for code, count in errors.items()
                 ],

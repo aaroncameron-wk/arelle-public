@@ -3,11 +3,11 @@ See COPYRIGHT.md for copyright information.
 """
 from __future__ import annotations
 from dataclasses import dataclass
-from functools import cached_property
 from pathlib import Path
 
 from arelle import XbrlConst
 from arelle.ModelValue import QName
+from test_engine.ActualError import ErrorLevel
 
 
 @dataclass(frozen=True)
@@ -16,17 +16,13 @@ class TestcaseConstraint:
     pattern: str | None = None
     min: int | None = None
     max: int | None = None
-    assertions: dict[str, tuple[int, ...]] | None = None
     tableUri: Path | None = None
-    warnings: bool = False
-    errors: bool = False
+    level: ErrorLevel = ErrorLevel.ERROR
 
     def __str__(self):
         value = str(self.qname or self.pattern or '(any)')
-        if self.errors:
-            value += " [E]"
-        if self.warnings:
-            value += " [W]"
+        if self.level:
+            value += f" [{self.level}]"
         minCount = self.min or 1
         maxCount = self.max or 1
         if minCount == maxCount:

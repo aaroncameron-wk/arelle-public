@@ -5,11 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from arelle.ModelValue import QName
+from test_engine.ActualError import ErrorLevel
 
 
 @dataclass(frozen=True)
 class TestcaseConstraintResult:
-    code: str | QName
+    code: tuple[str | QName, ErrorLevel]
     diff: int
 
     def __str__(self):
@@ -19,4 +20,5 @@ class TestcaseConstraintResult:
             message = f'× Missing {abs(self.diff)} expected'
         else:
             message = f'× {self.diff} unexpected'
-        return f"{message} \"{self.code or '(any)'}\""
+        code, level = self.code
+        return f"{message} {level} \"{code or '(any)'}\""
