@@ -396,6 +396,7 @@ def get_test_engine_test_results_with_shards(
         test_engine_options = TestEngineOptions(
             additionalConstraints=_get_additional_constraints(config),
             filters=testcase_filters,
+            ignoreLevels=config.ignore_levels,
             indexFile=str(config.entry_point_path),
             logDirectory=Path(f'conf-logs/{config.name}'),
             matchAll=config.test_case_result_options == 'match-all',
@@ -449,6 +450,7 @@ def get_test_engine_test_results_without_shards(
         test_engine_options=TestEngineOptions(
             additionalConstraints=_get_additional_constraints(config),
             filters=testcase_filters,
+            ignoreLevels=config.ignore_levels,
             indexFile=str(config.entry_point_path),
             logDirectory=Path(f'conf-logs/{config.name}'),
             matchAll=config.test_case_result_options == 'match-all',

@@ -4,6 +4,7 @@ See COPYRIGHT.md for copyright information.
 from __future__ import annotations
 from dataclasses import dataclass
 
+from test_engine.ActualError import ErrorLevel
 from test_engine.TestcaseConstraintSet import TestcaseConstraintSet
 
 
@@ -20,6 +21,7 @@ class TestcaseVariation:
     blockedCodePattern: str
     calcMode: str | None
     parameters: str
+    ignoreLevels: frozenset[ErrorLevel]
 
     @property
     def fullId(self) -> str:

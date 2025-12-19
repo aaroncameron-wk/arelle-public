@@ -1,5 +1,6 @@
 from pathlib import PurePath, Path
 
+from test_engine.ActualError import ErrorLevel
 from tests.integration_tests.validation.assets import NL_PACKAGES
 from tests.integration_tests.validation.conformance_suite_config import ConformanceSuiteConfig, ConformanceSuiteAssetConfig, AssetSource
 
@@ -20,10 +21,16 @@ config = ConformanceSuiteConfig(
     ],
     base_taxonomy_validation='none',
     disclosure_system='NT16',
-    expected_failure_ids=frozenset([
-        # message:valueAssertion_ConsolidatedCashFlowStatementInsurance_PrtFST1SumOfChildrenParentDebit6
-        'testcase-kvk-rpt-jaarverantwoording-2021-all-entrypoints-valid.xml:V-30',
-    ]),
+    expected_additional_testcase_errors={
+        'testcase-kvk-rpt-jaarverantwoording-2021-all-entrypoints-valid.xml:V-30': {
+            'message:valueAssertion_ConsolidatedCashFlowStatementInsurance_PrtFST1SumOfChildrenParentDebit6': 2
+        }
+    },
+    ignore_levels=frozenset({
+        ErrorLevel.NOT_SATISFIED,
+        ErrorLevel.OK,
+        ErrorLevel.WARNING,
+    }),
     info_url='https://sbr-nl.nl/sites/default/files/bestanden/taxonomie/SBR%20Filing%20Rules%20NT16%20-%2020210301_0.pdf',
     name=PurePath(__file__).stem,
     plugins=frozenset({'validate/NL'}),

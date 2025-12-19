@@ -271,6 +271,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                     blockedCodePattern=blockedCodePattern,
                     calcMode=calcMode,
                     parameters=PARAMETER_SEPARATOR.join(parameters),
+                    ignoreLevels=testEngineOptions.ignoreLevels,
                 ))
         return testcaseVariations
 
@@ -357,6 +358,8 @@ def runTestcaseVariation(
                         ErrorLevel.ERROR: errorCount
                     }
                     for level, count in countMap.items():
+                        if level in testcaseVariation.ignoreLevels:
+                            continue
                         for i in range(0, count):
                             actualErrors.append(ActualError(
                                 code=code,
@@ -491,7 +494,7 @@ def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dic
         if count == 0:
             continue
         actualError, level = actualKey
-        if level == ErrorLevel.SATISIFED:
+        if level in (ErrorLevel.SATISIFED, ErrorLevel.OK):
             continue
         diff[actualKey] = count
     return diff
