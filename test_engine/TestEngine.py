@@ -12,6 +12,7 @@ from pathlib import Path
 
 import re
 import time
+from urllib.parse import unquote
 
 from arelle.ModelObject import ModelObject
 from arelle.ModelValue import QName
@@ -126,7 +127,7 @@ def normPath(path: Path) -> str:
     pathStr = str(path)
     if pathStr.startswith("file:\\"):
         pathStr = pathStr[6:]
-    return pathStr
+    return unquote(pathStr)
 
 
 def buildEntrypointUris(uris: list[Path]) -> list[str]:
@@ -167,7 +168,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
         prefix = _longestCommonPrefix(uris)
         suffix = _longestCommonSuffix(uris)
         for doc in docs:
-            docUri = doc.uri.removeprefix(prefix).removesuffix(suffix)
+            docUri = (doc.uri + os.sep).removeprefix(prefix).removesuffix(suffix).strip(os.sep)
             for testcaseVariation in doc.testcaseVariations:
                 base = testcaseVariation.base
                 assert base is not None
