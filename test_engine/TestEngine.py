@@ -27,7 +27,7 @@ from test_engine.TestcaseConstraintSet import TestcaseConstraintSet
 from test_engine.TestcaseResult import TestcaseResult
 from test_engine.TestcaseVariation import TestcaseVariation
 
-
+CWD = Path.cwd()
 PARAMETER_SEPARATOR = '\n'
 DEFAULT_PLUGIN_OPTIONS = {
     'EDGAR/render': {
@@ -124,6 +124,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def normPath(path: Path) -> str:
+    path = path.relative_to(CWD) if path.is_relative_to(CWD) else path
     pathStr = str(path)
     if pathStr.startswith("file:\\"):
         pathStr = pathStr[6:]
@@ -263,6 +264,11 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                 if any(PARAMETER_SEPARATOR in parameter for parameter in parameters):
                     raise ValueError('Parameter separator found in parameter key or value.')
 
+                compareInstanceUri = None
+                instanceUri = testcaseVariation.resultXbrlInstanceUri
+                if instanceUri:
+                    compareInstanceUri = Path(doc.modelXbrl.modelManager.cntlr.webCache.normalizeUrl(instanceUri, testcaseVariation.base))
+
                 testcaseConstraintSet = TestcaseConstraintSet(
                     constraints=constraints,
                     matchAll=testEngineOptions.matchAll,
@@ -280,6 +286,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                     calcMode=calcMode,
                     parameters=PARAMETER_SEPARATOR.join(parameters),
                     ignoreLevels=testEngineOptions.ignoreLevels,
+                    compareInstanceUri=compareInstanceUri,
                 ))
         return testcaseVariations
 
@@ -348,9 +355,10 @@ def runTestcaseVariation(
     entrypointFile = '|'.join(entrypointUris)
     runtimeOptions = RuntimeOptions(
         entrypointFile=entrypointFile,
-        logFile=str(testEngineOptions.logDirectory / f"{logFilename(testcaseVariation.shortName)}-log.txt"),
+        logFile=normPath(testEngineOptions.logDirectory / f"{logFilename(testcaseVariation.shortName)}-log.txt"),
         parameters=testcaseVariation.parameters,
         parameterSeparator=PARAMETER_SEPARATOR,
+        compareInstance=normPath(testcaseVariation.compareInstanceUri),
         **dynamicOptions
     )
     runtimeOptionsJson = json.dumps({k: v for k, v in vars(runtimeOptions).items() if v is not None}, indent=4, sort_keys=True)

@@ -3,6 +3,7 @@ See COPYRIGHT.md for copyright information.
 """
 from __future__ import annotations
 from dataclasses import dataclass
+from pathlib import Path
 
 from test_engine.ErrorLevel import ErrorLevel
 from test_engine.TestcaseConstraintSet import TestcaseConstraintSet
@@ -22,6 +23,7 @@ class TestcaseVariation:
     calcMode: str | None
     parameters: str
     ignoreLevels: frozenset[ErrorLevel]
+    compareInstanceUri: Path | None
 
     @property
     def fullId(self) -> str:
