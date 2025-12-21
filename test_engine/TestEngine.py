@@ -10,7 +10,7 @@ import os
 from collections import defaultdict
 from pathlib import Path
 
-import regex
+import re
 import time
 
 from arelle.ModelValue import QName
@@ -82,6 +82,12 @@ def parse_args() -> argparse.Namespace:
         help="Path or URL to the testcase index file.",
         required=True,
         type=str
+    )
+    parser.add_argument(
+        '-e', '--error-code-substitutions',
+        help="Replacement regex patterns to apply to error codes. Format: \"{pattern}|{replacement}\".",
+        required=False,
+        action='append',
     )
     parser.add_argument(
         '-f', '--filters',
@@ -292,8 +298,23 @@ def filterTestcaseVariation(testcaseVariation: TestcaseVariation, filters: list[
 
 
 def logFilename(name: str) -> str:
-    name = regex.sub(r'[<>:"/\\|?*\x00-\x1F]', '_', name)
+    name = re.sub(r'[<>:"/\\|?*\x00-\x1F]', '_', name)
     return name.strip().strip('.')
+
+def buildActualError(
+        testEngineOptions: TestEngineOptions,
+        code: str | None,
+        qname: QName | None,
+        level: ErrorLevel,
+) -> ActualError:
+    if code is not None:
+        for pattern, replacement in testEngineOptions.errorCodeSubstitutions:
+            code = re.sub(pattern, replacement, code)
+    return ActualError(
+        code=code,
+        qname=qname,
+        level=level
+    )
 
 
 def runTestcaseVariation(
@@ -355,19 +376,22 @@ def runTestcaseVariation(
                         ErrorLevel.NOT_SATISFIED: notSatisfiedCount,
                         ErrorLevel.OK: okCount,
                         ErrorLevel.WARNING: warningCount,
-                        ErrorLevel.ERROR: errorCount
+                        # Also captured as a separate "error"
+                        # ErrorLevel.ERROR: errorCountÎ
                     }
                     for level, count in countMap.items():
                         if level in testcaseVariation.ignoreLevels:
                             continue
                         for i in range(0, count):
-                            actualErrors.append(ActualError(
+                            actualErrors.append(buildActualError(
+                                testEngineOptions=testEngineOptions,
                                 code=code,
                                 qname=None,
                                 level=level,
                             ))
                 continue
-            actualErrors.append(ActualError(
+            actualErrors.append(buildActualError(
+                testEngineOptions=testEngineOptions,
                 code=error if isinstance(error, str) else None,
                 qname=error if isinstance(error, QName) else None,
                 level=ErrorLevel.ERROR,
@@ -454,7 +478,7 @@ def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[Actu
     blockedCodes = defaultdict(int)
     if not pattern:
         return actualErrors, blockedCodes
-    compiledPattern = regex.compile(regex.sub(r'\\(.)', r'\1', pattern))
+    compiledPattern = re.compile(re.sub(r'\\(.)', r'\1', pattern))
     for actualError in actualErrors:
         value = str(actualError.qname or actualError.code)
         if compiledPattern.match(value):
@@ -583,6 +607,11 @@ if __name__ == "__main__":
     args = parse_args()
     run(TestEngineOptions(
         additionalConstraints=[],
+        errorCodeSubstitutions=[
+            (re.compile(pattern), replacement)
+            for part in args.error_code_subsitutions
+            for pattern,sep,replacement in (part.partition('|'),)
+        ],
         filters=args.filters,
         indexFile=args.index,
         logDirectory=Path(args.log_directory),

@@ -4,6 +4,7 @@ See COPYRIGHT.md for copyright information.
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
+from re import Pattern
 from typing import Any
 
 from test_engine.ActualError import ErrorLevel
@@ -13,6 +14,7 @@ from test_engine.TestcaseConstraint import TestcaseConstraint
 @dataclass(frozen=True)
 class TestEngineOptions:
     additionalConstraints: list[tuple[str, list[TestcaseConstraint]]]
+    errorCodeSubstitutions: list[tuple[Pattern[str], str]]
     filters: list[str]
     ignoreLevels: frozenset[ErrorLevel]
     indexFile: str

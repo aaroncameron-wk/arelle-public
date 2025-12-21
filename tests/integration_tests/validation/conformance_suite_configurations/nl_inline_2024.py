@@ -1,3 +1,4 @@
+import re
 from pathlib import PurePath, Path
 
 from test_engine.ActualError import ErrorLevel
@@ -21,6 +22,9 @@ config = ConformanceSuiteConfig(
     ],
     base_taxonomy_validation='none',
     disclosure_system='NL-INLINE-2024',
+    error_code_substitutions=[
+        (re.compile(r'NL\.NL-KVK.*\.'), '')
+    ],
     expected_additional_testcase_errors={f"conformance-suite-2024-sbr-domein-handelsregister/tests/{s}": val for s, val in {
         'G3-1-3_1/index.xml:TC2_invalid': {
             'scenarioNotUsedInExtensionTaxonomy': 1,  # Also fails 4.2.1.1

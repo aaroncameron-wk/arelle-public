@@ -1,3 +1,4 @@
+import re
 from pathlib import PurePath, Path
 
 from tests.integration_tests.validation.assets import NL_PACKAGES
@@ -19,6 +20,9 @@ config = ConformanceSuiteConfig(
     ],
     base_taxonomy_validation='none',
     disclosure_system='NL-INLINE-2024-GAAP-OTHER',
+    error_code_substitutions=[
+        (re.compile(r'NL\.NL-KVK.*\.'), '')
+    ],
     expected_additional_testcase_errors={f"conformance-suite-2024-sbr-domein-handelsregister/tests/{s}": val for s, val in {
         'G5-1-3_1/index.xml:TC1_valid': {
             'noInlineXbrlTags': 1,
