@@ -22,3 +22,9 @@ class ActualError:
     code: str | None
     qname: QName | None
     level: ErrorLevel
+
+    def __str__(self):
+        value = str(self.qname or self.code)
+        if self.level:
+            value += f" [{self.level}]"
+        return value
