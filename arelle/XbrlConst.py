@@ -664,7 +664,7 @@ errMsgPrefixNS = {  # err prefixes which are not declared, such as XPath's "err"
     "xmlSchema": xdtSchemaErrorNS,
     "utre": "http://www.xbrl.org/2009/utr/errors",
 }
-errMsgNamespaceLocalNameMap = {
+errMsgNamespaceLocalNameMap: dict[str | None, dict[str, str]] = {
     xdtSchemaErrorNS: {
         "valueError": "XmlSchemaError",
     }

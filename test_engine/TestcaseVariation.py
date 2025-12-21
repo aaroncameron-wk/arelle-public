@@ -4,7 +4,7 @@ See COPYRIGHT.md for copyright information.
 from __future__ import annotations
 from dataclasses import dataclass
 
-from test_engine.ActualError import ErrorLevel
+from test_engine.ErrorLevel import ErrorLevel
 from test_engine.TestcaseConstraintSet import TestcaseConstraintSet
 
 
@@ -17,7 +17,7 @@ class TestcaseVariation:
     readFirstUris: list[str]
     shortName: str
     status: str
-    testcaseConstraintSet: TestcaseConstraintSet | None
+    testcaseConstraintSet: TestcaseConstraintSet
     blockedCodePattern: str
     calcMode: str | None
     parameters: str

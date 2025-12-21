@@ -7,7 +7,7 @@ from pathlib import Path
 
 from arelle import XbrlConst
 from arelle.ModelValue import QName
-from test_engine.ActualError import ErrorLevel
+from test_engine.ErrorLevel import ErrorLevel
 
 
 @dataclass(frozen=True)
@@ -19,7 +19,7 @@ class TestcaseConstraint:
     tableUri: Path | None = None
     level: ErrorLevel = ErrorLevel.ERROR
 
-    def __str__(self):
+    def __str__(self) -> str:
         value = str(self.qname or self.pattern or '(any)')
         if self.level:
             value += f" [{self.level}]"

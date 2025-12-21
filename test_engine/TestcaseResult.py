@@ -21,7 +21,7 @@ class TestcaseResult:
     duration_seconds: float
     blockedErrors: dict[str, int]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             (f"{self.testcaseVariation.shortName} \t") +
             (self.status.upper()) +

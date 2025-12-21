@@ -13,11 +13,11 @@ from pathlib import Path
 import re
 import time
 
+from arelle.ModelObject import ModelObject
 from arelle.ModelValue import QName
 from arelle.RuntimeOptions import RuntimeOptions
+from arelle.UrlUtil import IXDS_DOC_SEPARATOR, IXDS_SURROGATE
 from arelle.api.Session import Session
-from arelle.logging.handlers.StructuredMessageLogHandler import StructuredMessageLogHandler
-from arelle.plugin.inlineXbrlDocumentSet import IXDS_SURROGATE, IXDS_DOC_SEPARATOR
 from test_engine.ActualError import ActualError, ErrorLevel
 from test_engine.TestEngineOptions import TestEngineOptions
 from test_engine.TestcaseConstraint import TestcaseConstraint
@@ -39,7 +39,7 @@ DEFAULT_PLUGIN_OPTIONS = {
 }
 
 
-def _hardcodedMatch(expected, actual):
+def _hardcodedMatch(expected: str, actual: str) -> bool:
     # TODO: Sourced from legacy testcase variation processor. Replace with config.
     return (
             (expected == "EFM.6.03.04" and actual.startswith("xmlSchema:")) or
@@ -170,6 +170,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
             docUri = doc.uri.removeprefix(prefix).removesuffix(suffix)
             for testcaseVariation in doc.testcaseVariations:
                 base = testcaseVariation.base
+                assert base is not None
                 if base.startswith("file:\\"):
                     base = base[6:]
                 fullId = f"{base}:{testcaseVariation.id}" # TODO: Defined twice
@@ -181,7 +182,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                 from arelle import XmlUtil
                 calcMode = None
                 resultElt = XmlUtil.descendant(testcaseVariation, None, "result")
-                if resultElt is not None:
+                if isinstance(resultElt, ModelObject):
                     calcMode = resultElt.attr('{https://xbrl.org/2023/conformance}mode')
                 if calcMode == 'truncate':
                     calcMode = 'truncation'
@@ -352,8 +353,9 @@ def runTestcaseVariation(
         **dynamicOptions
     )
     runtimeOptionsJson = json.dumps({k: v for k, v in vars(runtimeOptions).items() if v is not None}, indent=4, sort_keys=True)
-    with open(runtimeOptions.logFile, 'w') as f:
-        f.write(f'Running [{testcaseVariation.fullId}] with options:\n{runtimeOptionsJson}\n------\n')
+    if runtimeOptions.logFile is not None:
+        with open(runtimeOptions.logFile, 'w') as f:
+            f.write(f'Running [{testcaseVariation.fullId}] with options:\n{runtimeOptionsJson}\n------\n')
     with Session() as session:
         start_ts = time.perf_counter_ns()
         session.run(
@@ -363,7 +365,8 @@ def runTestcaseVariation(
         duration_seconds = (time.perf_counter_ns() - start_ts) / 1_000_000_000
         # logs = session.get_log_messages()
         actualErrors = []
-        errors = []
+        errors: list[str | None] = []
+        assert session._cntlr is not None
         errors.extend(session._cntlr.errors)
         for model in session.get_models():
             errors.extend(model.errors)
@@ -439,7 +442,7 @@ def runTestcaseVariationsInSeries(
 def _normalizedConstraints(
         constraints: list[TestcaseConstraint]
 ) -> list[TestcaseConstraint]:
-    normalizedConstraintsMap = {}
+    normalizedConstraintsMap: dict[tuple[QName | None, str | None, Path | None, ErrorLevel], tuple[int | None, int | None]] = {}
     for constraint in constraints:
         key = (
             constraint.qname,
@@ -475,7 +478,7 @@ def _normalizedConstraints(
 
 def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[ActualError], dict[str, int]]:
     results = []
-    blockedCodes = defaultdict(int)
+    blockedCodes: dict[str, int] = defaultdict(int)
     if not pattern:
         return actualErrors, blockedCodes
     compiledPattern = re.compile(re.sub(r'\\(.)', r'\1', pattern))
@@ -529,10 +532,10 @@ def buildResult(
     duration_seconds: float,
     additionalConstraints: list[tuple[str, list[TestcaseConstraint]]],
 ) -> TestcaseResult:
-    actualErrorCounts = defaultdict(int)
+    actualErrorCounts: dict[tuple[QName | str, ErrorLevel], int] = defaultdict(int)
     actualErrors, blockedErrors = blockCodes(actualErrors, testcaseVariation.blockedCodePattern)
     for actualError in actualErrors:
-        actualErrorCounts[(actualError.qname or actualError.code, actualError.level)] += 1
+        actualErrorCounts[(actualError.qname or actualError.code or '', actualError.level)] += 1
     appliedConstraints = list(testcaseVariation.testcaseConstraintSet.constraints)
     for filter, constraints in additionalConstraints:
         if fnmatch.fnmatch(testcaseVariation.fullId, f'*{filter}'):
@@ -613,6 +616,7 @@ if __name__ == "__main__":
             for pattern,sep,replacement in (part.partition('|'),)
         ],
         filters=args.filters,
+        ignoreLevels=frozenset(), # TODO: CLI arg
         indexFile=args.index,
         logDirectory=Path(args.log_directory),
         matchAll=args.match_all,

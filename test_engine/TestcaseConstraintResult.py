@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from arelle.ModelValue import QName
-from test_engine.ActualError import ErrorLevel
+from test_engine.ErrorLevel import ErrorLevel
 
 
 @dataclass(frozen=True)
@@ -13,7 +13,7 @@ class TestcaseConstraintResult:
     code: tuple[str | QName, ErrorLevel]
     diff: int
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.diff == 0:
             message = f'Matched'
         elif self.diff < 0:

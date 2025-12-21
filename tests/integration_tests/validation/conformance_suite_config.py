@@ -8,7 +8,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Literal, Any, Callable
 
-from test_engine.ActualError import ErrorLevel
+from test_engine.ErrorLevel import ErrorLevel
 from tests.integration_tests.github import OS_CORES
 
 CONFORMANCE_SUITE_PATH_PREFIX = 'tests/resources/conformance_suites'
@@ -141,7 +141,7 @@ class ConformanceSuiteAssetConfig:
 
     @staticmethod
     def extracted_conformance_suite(
-            extract_sequence: tuple[tuple[Path, Path]],
+            extract_sequence: tuple[tuple[Path, Path], ...],
             entry_point_root: Path,
             entry_point: Path,
             public_download_url: str | None = None,

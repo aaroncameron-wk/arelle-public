@@ -2,20 +2,12 @@
 See COPYRIGHT.md for copyright information.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass
-from enum import Enum
 
 from arelle.ModelValue import QName
+from test_engine.ErrorLevel import ErrorLevel
 
-class ErrorLevel(Enum):
-    OK = "OK"
-    SATISIFED = "SATISIFED"
-    NOT_SATISFIED = "NOT_SATISFIED"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-
-    def __str__(self):
-        return self.value
 
 @dataclass(frozen=True)
 class ActualError:
@@ -23,7 +15,7 @@ class ActualError:
     qname: QName | None
     level: ErrorLevel
 
-    def __str__(self):
+    def __str__(self) -> str:
         value = str(self.qname or self.code)
         if self.level:
             value += f" [{self.level}]"

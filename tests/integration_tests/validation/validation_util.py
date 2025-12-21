@@ -416,20 +416,23 @@ def get_test_engine_test_results_with_shards(
     for task in tasks:
         task_results = get_test_engine_mp_wrapper(task)
         results.extend(task_results)
-    merged_results = {}
+    merged_results: dict[str, ParameterSet] = {}
     for result in results:
-        status = result.values[0].get('status')
-        existing_result = merged_results.get(result.id)
+        result_id = str(result.id)
+        values = cast(dict[str, Any], result.values[0])
+        status = values.get('status')
+        existing_result = merged_results.get(result_id)
         if existing_result is None:
-            merged_results[result.id] = result
+            merged_results[result_id] = result
         elif status != 'skip':
-            existing_status = existing_result.values[0].get('status')
+            existing_values = cast(dict[str, Any], existing_result.values[0])
+            existing_status = existing_values.get('status')
             assert existing_status == 'skip', \
-                f'Conflicting results for {result.id}: {existing_status} vs {status}'
-            merged_results[result.id] = result
-    results = list(sorted(merged_results.values(), key=lambda x: x.id))
+                f'Conflicting results for {result_id}: {existing_status} vs {status}'
+            merged_results[result_id] = result
+    results = list(sorted(merged_results.values(), key=lambda x: str(x.id)))
 
-    assert sum(1 for r in results if r.values[0].get('status') != 'skip') == len(all_testcase_filters), \
+    assert sum(1 for r in results if cast(dict[str, Any], r.values[0]).get('status') != 'skip') == len(all_testcase_filters), \
         f'Expected {len(all_testcase_filters)} results based on testcase filters, received {len(results)}'
     return results
 
@@ -451,7 +454,7 @@ def get_test_engine_test_results_without_shards(
         test_engine_options=TestEngineOptions(
             additionalConstraints=_get_additional_constraints(config),
             errorCodeSubstitutions=config.error_code_substitutions,
-            filters=testcase_filters,
+            filters=testcase_filters or [],
             ignoreLevels=config.ignore_levels,
             indexFile=str(config.entry_point_path),
             logDirectory=Path(f'conf-logs/{config.name}'),
@@ -620,7 +623,7 @@ def save_actual_results_file(config: ConformanceSuiteConfig, results: list[Param
     rows = []
     for result in results:
         testcase_id = result.id
-        actual_codes = result.values[0].get('actual')  # type: ignore[union-attr] TODO: update for test engine
+        actual_codes = cast(dict[str, list[str]], result.values[0]).get('actual') or []  # TODO: update for test engine
         for code in actual_codes:
             rows.append((testcase_id, code))
     output_filepath = Path(f'conf-{config.name}-actual.csv')

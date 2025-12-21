@@ -1,6 +1,6 @@
 from pathlib import PurePath, Path
 
-from test_engine.ActualError import ErrorLevel
+from test_engine.ErrorLevel import ErrorLevel
 from tests.integration_tests.validation.assets import NL_PACKAGES
 from tests.integration_tests.validation.conformance_suite_config import ConformanceSuiteConfig, ConformanceSuiteAssetConfig, AssetSource
 

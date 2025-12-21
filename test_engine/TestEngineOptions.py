@@ -7,7 +7,7 @@ from pathlib import Path
 from re import Pattern
 from typing import Any
 
-from test_engine.ActualError import ErrorLevel
+from test_engine.ErrorLevel import ErrorLevel
 from test_engine.TestcaseConstraint import TestcaseConstraint
 
 

@@ -4,13 +4,14 @@ import fnmatch
 import json
 import locale
 import os.path
+
 import urllib.parse
 from collections import Counter, defaultdict
 from pathlib import PurePath
 from typing import TYPE_CHECKING, cast, Any
 
 import pytest
-import regex
+import re
 
 from arelle import ModelDocument, PackageManager, PluginManager
 from arelle.Cntlr import Cntlr
@@ -79,7 +80,7 @@ def get_s3_uri(path: str, version_id: str | None = None) -> str:
 def get_test_data(
         args: list[str],
         expected_failure_ids: frozenset[str] = frozenset(),
-        required_locale_by_ids: dict[str, regex.Pattern[str]] | None = None,
+        required_locale_by_ids: dict[str, re.Pattern[str]] | None = None,
         strict_testcase_index: bool = True,
 ) -> list[ParameterSet]:
     """
@@ -138,7 +139,7 @@ def get_test_data(
                                 expected_results["WARNING"][str(warning)] += 1
                     # Arelle adds message code frequencies to the end, but conformance suites usually don't.
                     # Skip assertion results dictionaries.
-                    actual = [regex.sub(r' \(\d+\)$', '', code) for code in mv.actual if not isinstance(code, dict)]
+                    actual = [re.sub(r' \(\d+\)$', '', code) for code in mv.actual if not isinstance(code, dict)]
                     param = pytest.param(
                         {
                             'status': mv.status,
@@ -230,7 +231,7 @@ def get_test_engine_data(
                 # Arelle adds message code frequencies to the end, but conformance suites usually don't.
                 # Skip assertion results dictionaries.
                 actual = [
-                    regex.sub(r' \(\d+\)$', '',  str(actualError.qname or actualError.code))
+                    re.sub(r' \(\d+\)$', '',  str(actualError.qname or actualError.code))
                     for actualError in test_case_result.actualErrors
                 ]
                 param = pytest.param(
@@ -261,13 +262,13 @@ def get_test_engine_data(
         return results
     finally:
         PackageManager.close()  # type: ignore[no-untyped-call]
-        PluginManager.close()  # type: ignore[no-untyped-call]
+        PluginManager.close()
 
 
 def collect_test_data(
         cntlr: Cntlr,
         expected_failure_ids: frozenset[str],
-        required_locale_by_ids: dict[str, regex.Pattern[str]],
+        required_locale_by_ids: dict[str, re.Pattern[str]],
         system_locale: str,
         results: list[ParameterSet],
         model_document: ModelDocument.ModelDocument,
@@ -295,7 +296,7 @@ def collect_test_data(
 def isExpectedFailure(
         test_id: str,
         expected_failure_ids: frozenset[str],
-        required_locale_by_ids: dict[str, regex.Pattern[str]],
+        required_locale_by_ids: dict[str, re.Pattern[str]],
         system_locale: str,
 ) -> bool:
     if test_id in expected_failure_ids:
