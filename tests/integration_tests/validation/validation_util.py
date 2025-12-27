@@ -395,6 +395,7 @@ def get_test_engine_test_results_with_shards(
         )
         test_engine_options = TestEngineOptions(
             additionalConstraints=_get_additional_constraints(config),
+            compareFormulaOutput=config.compare_formula_output,
             errorCodeSubstitutions=config.error_code_substitutions,
             filters=testcase_filters,
             ignoreLevels=config.ignore_levels,
@@ -453,6 +454,7 @@ def get_test_engine_test_results_without_shards(
     return get_test_engine_data(
         test_engine_options=TestEngineOptions(
             additionalConstraints=_get_additional_constraints(config),
+            compareFormulaOutput=config.compare_formula_output,
             errorCodeSubstitutions=config.error_code_substitutions,
             filters=testcase_filters or [],
             ignoreLevels=config.ignore_levels,

@@ -14,6 +14,7 @@ from test_engine.TestcaseConstraint import TestcaseConstraint
 @dataclass(frozen=True)
 class TestEngineOptions:
     additionalConstraints: list[tuple[str, list[TestcaseConstraint]]]
+    compareFormulaOutput: bool
     errorCodeSubstitutions: list[tuple[Pattern[str], str]]
     filters: list[str]
     ignoreLevels: frozenset[ErrorLevel]

@@ -171,123 +171,138 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
         for doc in docs:
             docUri = (doc.uri + os.sep).removeprefix(prefix).removesuffix(suffix).strip(os.sep)
             for testcaseVariation in doc.testcaseVariations:
-                base = testcaseVariation.base
-                assert base is not None
-                if base.startswith("file:\\"):
-                    base = base[6:]
-                fullId = f"{base}:{testcaseVariation.id}" # TODO: Defined twice
-                if testEngineOptions.filters:
-                    if not any(fnmatch.fnmatch(fullId, filter) for filter in testEngineOptions.filters):
-                        continue # TODO: Only filter here
+                inlineTargets = [instElt.get("target")
+                               for resultElt in testcaseVariation.iterdescendants("{*}result")
+                               for instElt in resultElt.iterdescendants("{*}instance")] or [None]
+                for inlineTarget in inlineTargets:
+                    if len(inlineTargets) > 1 and inlineTarget is None:
+                        inlineTarget = "(default)"
+                    testcaseVariation.ixdsTarget = inlineTarget
+                    base = testcaseVariation.base
+                    assert base is not None
+                    if base.startswith("file:\\"):
+                        base = base[6:]
+                    localId = f"{testcaseVariation.id}" + (f"_{inlineTarget}" if inlineTarget else "")
+                    fullId = f"{base}:{localId}"
+                    if testEngineOptions.filters:
+                        if not any(fnmatch.fnmatch(fullId, filter) for filter in testEngineOptions.filters):
+                            continue # TODO: Only filter here
 
-                # TODO: Improve
-                from arelle import XmlUtil
-                calcMode = None
-                resultElt = XmlUtil.descendant(testcaseVariation, None, "result")
-                if isinstance(resultElt, ModelObject):
-                    calcMode = resultElt.attr('{https://xbrl.org/2023/conformance}mode')
-                if calcMode == 'truncate':
-                    calcMode = 'truncation'
+                    # TODO: Improve
+                    from arelle import XmlUtil
+                    calcMode = None
+                    resultElt = XmlUtil.descendant(testcaseVariation, None, "result")
+                    if isinstance(resultElt, ModelObject):
+                        calcMode = resultElt.attr('{https://xbrl.org/2023/conformance}mode')
+                    if calcMode == 'truncate':
+                        calcMode = 'truncation'
 
-                constraints = []
-                expected = testcaseVariation.expected or 'valid'
-                if not isinstance(expected, list):
-                    expected = [expected]
-                for e in expected:
-                    # TODO: table element
-                    # TODO: testcase element
-                    # TODO: testGroup element
-                    # TODO: result element
-                    # TODO: assert elements
-                    # TODO: assertionTests elements
-                    if e == 'valid':
-                        pass
-                    elif e == 'invalid':
+                    constraints = []
+                    expected = testcaseVariation.expected or 'valid'
+                    if not isinstance(expected, list):
+                        expected = [expected]
+                    for e in expected:
+                        # TODO: table element
+                        # TODO: testcase element
+                        # TODO: testGroup element
+                        # TODO: result element
+                        # TODO: assert elements
+                        # TODO: assertionTests elements
+                        if e == 'valid':
+                            pass
+                        elif e == 'invalid':
+                            constraints.append(TestcaseConstraint(
+                                pattern='',  # matches any code
+                                min=1,
+                            ))
+                        elif isinstance(e, QName):
+                            constraints.append(TestcaseConstraint(
+                                qname=e,
+                                min=1,
+                            ))
+                        elif isinstance(e, str):
+                            constraints.append(TestcaseConstraint(
+                                pattern=e,
+                                min=1,
+                            ))
+                        elif isinstance(e, dict):
+                            for pattern, assertions in e.items():
+                                satisfiedCount, notSatisfiedCount = assertions
+                                countMap = {
+                                    ErrorLevel.SATISIFED: satisfiedCount,
+                                    ErrorLevel.NOT_SATISFIED: notSatisfiedCount,
+                                }
+                                for level, count in countMap.items():
+                                    for i in range(0, count):
+                                        constraints.append(TestcaseConstraint(
+                                            pattern=pattern,
+                                            level=level,
+                                        ))
+                        else:
+                            raise ValueError(f"Unexpected expected error type: {type(e)}")
+                    if (resultTableUri := testcaseVariation.resultTableUri) is not None:
                         constraints.append(TestcaseConstraint(
-                            pattern='',  # matches any code
-                            min=1,
+                            tableUri=Path(resultTableUri),
                         ))
-                    elif isinstance(e, QName):
-                        constraints.append(TestcaseConstraint(
-                            qname=e,
-                            min=1,
-                        ))
-                    elif isinstance(e, str):
-                        constraints.append(TestcaseConstraint(
-                            pattern=e,
-                            min=1,
-                        ))
-                    elif isinstance(e, dict):
-                        for pattern, assertions in e.items():
-                            satisfiedCount, notSatisfiedCount = assertions
-                            countMap = {
-                                ErrorLevel.SATISIFED: satisfiedCount,
-                                ErrorLevel.NOT_SATISFIED: notSatisfiedCount,
-                            }
-                            for level, count in countMap.items():
-                                for i in range(0, count):
-                                    constraints.append(TestcaseConstraint(
-                                        pattern=pattern,
-                                        level=level,
-                                    ))
-                    else:
-                        raise ValueError(f"Unexpected expected error type: {type(e)}")
-                if (resultTableUri := testcaseVariation.resultTableUri) is not None:
-                    constraints.append(TestcaseConstraint(
-                        tableUri=Path(resultTableUri),
+
+
+                    expectedWarnings = testcaseVariation.expectedWarnings or []
+                    for warning in expectedWarnings:
+                        if isinstance(warning, QName):
+                            constraints.append(TestcaseConstraint(
+                                qname=warning,
+                                min=1,
+                                level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
+                            ))
+                        elif isinstance(warning, str):
+                            constraints.append(TestcaseConstraint(
+                                pattern=warning,
+                                min=1,
+                                level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
+                            ))
+                        else:
+                            raise ValueError(f"Unexpected expected warning type: {type(e)}")
+
+                    blockedCodePattern = testcaseVariation.blockedMessageCodes # restricts codes examined when provided
+
+                    parameters = [
+                        f'{k.clarkNotation}={v[1]}'
+                        for k, v in testcaseVariation.parameters.items()
+                    ]
+                    if any(PARAMETER_SEPARATOR in parameter for parameter in parameters):
+                        raise ValueError('Parameter separator found in parameter key or value.')
+
+                    compareInstanceUri = None
+                    compareFormulaOutputUri = None
+                    instanceUri = testcaseVariation.resultXbrlInstanceUri
+                    if instanceUri:
+                        compareInstanceUri = Path(doc.modelXbrl.modelManager.cntlr.webCache.normalizeUrl(instanceUri, testcaseVariation.base))
+                        if testEngineOptions.compareFormulaOutput:
+                            compareFormulaOutputUri = compareInstanceUri
+                            compareInstanceUri = None
+
+                    testcaseConstraintSet = TestcaseConstraintSet(
+                        constraints=constraints,
+                        matchAll=testEngineOptions.matchAll,
+                    )
+                    testcaseVariations.append(TestcaseVariation(
+                        id=localId,
+                        fullId=fullId,
+                        name=testcaseVariation.name,
+                        description=testcaseVariation.description,
+                        base=base,
+                        readFirstUris=testcaseVariation.readMeFirstUris,
+                        shortName=f"{docUri}:{localId}",
+                        status=testcaseVariation.status,
+                        testcaseConstraintSet=testcaseConstraintSet,
+                        blockedCodePattern=blockedCodePattern,
+                        calcMode=calcMode,
+                        parameters=PARAMETER_SEPARATOR.join(parameters),
+                        ignoreLevels=testEngineOptions.ignoreLevels,
+                        compareInstanceUri=compareInstanceUri,
+                        compareFormulaOutputUri=compareFormulaOutputUri,
+                        inlineTarget=inlineTarget,
                     ))
-
-
-                expectedWarnings = testcaseVariation.expectedWarnings or []
-                for warning in expectedWarnings:
-                    if isinstance(warning, QName):
-                        constraints.append(TestcaseConstraint(
-                            qname=warning,
-                            min=1,
-                            level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
-                        ))
-                    elif isinstance(warning, str):
-                        constraints.append(TestcaseConstraint(
-                            pattern=warning,
-                            min=1,
-                            level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
-                        ))
-                    else:
-                        raise ValueError(f"Unexpected expected warning type: {type(e)}")
-
-                blockedCodePattern = testcaseVariation.blockedMessageCodes # restricts codes examined when provided
-
-                parameters = [
-                    f'{k.clarkNotation}={v[1]}'
-                    for k, v in testcaseVariation.parameters.items()
-                ]
-                if any(PARAMETER_SEPARATOR in parameter for parameter in parameters):
-                    raise ValueError('Parameter separator found in parameter key or value.')
-
-                compareInstanceUri = None
-                instanceUri = testcaseVariation.resultXbrlInstanceUri
-                if instanceUri:
-                    compareInstanceUri = Path(doc.modelXbrl.modelManager.cntlr.webCache.normalizeUrl(instanceUri, testcaseVariation.base))
-
-                testcaseConstraintSet = TestcaseConstraintSet(
-                    constraints=constraints,
-                    matchAll=testEngineOptions.matchAll,
-                )
-                testcaseVariations.append(TestcaseVariation(
-                    id=testcaseVariation.id,
-                    name=testcaseVariation.name,
-                    description=testcaseVariation.description,
-                    base=base,
-                    readFirstUris=testcaseVariation.readMeFirstUris,
-                    shortName=f"{docUri}:{testcaseVariation.id}",
-                    status=testcaseVariation.status,
-                    testcaseConstraintSet=testcaseConstraintSet,
-                    blockedCodePattern=blockedCodePattern,
-                    calcMode=calcMode,
-                    parameters=PARAMETER_SEPARATOR.join(parameters),
-                    ignoreLevels=testEngineOptions.ignoreLevels,
-                    compareInstanceUri=compareInstanceUri,
-                ))
         return testcaseVariations
 
 
@@ -346,11 +361,16 @@ def runTestcaseVariation(
         for readMeFirstUri in testcaseVariation.readFirstUris
     ])
     dynamicOptions = dict(testEngineOptions.options)
+    pluginOptions = {}
+    dynamicOptions['pluginOptions'] = pluginOptions
     if testcaseVariation.calcMode is not None:
         dynamicOptions['calcs'] = testcaseVariation.calcMode
     if 'plugins' in dynamicOptions:
         for plugin in dynamicOptions['plugins'].split('|'):
-            dynamicOptions['pluginOptions'] = dynamicOptions.get('pluginOptions', {}) | DEFAULT_PLUGIN_OPTIONS.get(plugin, {})
+            pluginOptions |= dynamicOptions.get('pluginOptions', {}) | DEFAULT_PLUGIN_OPTIONS.get(plugin, {})
+
+    if testcaseVariation.inlineTarget:
+        pluginOptions['inlineTarget'] = testcaseVariation.inlineTarget
 
     entrypointFile = '|'.join(entrypointUris)
     runtimeOptions = RuntimeOptions(
@@ -358,7 +378,8 @@ def runTestcaseVariation(
         logFile=normPath(testEngineOptions.logDirectory / f"{logFilename(testcaseVariation.shortName)}-log.txt"),
         parameters=testcaseVariation.parameters,
         parameterSeparator=PARAMETER_SEPARATOR,
-        compareInstance=normPath(testcaseVariation.compareInstanceUri),
+        compareFormulaOutput=normPath(testcaseVariation.compareFormulaOutputUri) if testcaseVariation.compareFormulaOutputUri else None,
+        compareInstance=normPath(testcaseVariation.compareInstanceUri) if testcaseVariation.compareInstanceUri else None,
         **dynamicOptions
     )
     runtimeOptionsJson = json.dumps({k: v for k, v in vars(runtimeOptions).items() if v is not None}, indent=4, sort_keys=True)
@@ -619,6 +640,7 @@ if __name__ == "__main__":
     args = parse_args()
     run(TestEngineOptions(
         additionalConstraints=[],
+        compareFormulaOutput=False, # TODO
         errorCodeSubstitutions=[
             (re.compile(pattern), replacement)
             for part in args.error_code_subsitutions

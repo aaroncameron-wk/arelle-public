@@ -12,6 +12,7 @@ from test_engine.TestcaseConstraintSet import TestcaseConstraintSet
 @dataclass(frozen=True)
 class TestcaseVariation:
     id: str
+    fullId: str
     name: str
     description: str
     base: str
@@ -23,8 +24,6 @@ class TestcaseVariation:
     calcMode: str | None
     parameters: str
     ignoreLevels: frozenset[ErrorLevel]
+    compareFormulaOutputUri: Path | None
     compareInstanceUri: Path | None
-
-    @property
-    def fullId(self) -> str:
-        return f"{self.base}:{self.id}"
+    inlineTarget: str | None
