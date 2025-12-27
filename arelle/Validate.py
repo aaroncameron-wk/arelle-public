@@ -636,23 +636,21 @@ class Validate:
                                     modelTestcaseVariation.resultXbrlInstanceUri is not None)
         if compareIxResultInstance:
             formulaOutputInstance = modelXbrl # compare modelXbrl to generated output instance
-            errMsgPrefix = "ix"
         else: # delete input instances before formula output comparision
             for inputDTSlist in inputDTSes.values():
                 for inputDTS in inputDTSlist:
                     inputDTS.close()
             del inputDTSes # dereference
-            errMsgPrefix = "formula"
         if resultIsXbrlInstance and formulaOutputInstance and formulaOutputInstance.modelDocument:
             compareErrors = compareInstance(
-                modelXbrl,
-                formulaOutputInstance,
-                self.modelXbrl.modelManager.cntlr.webCache.normalizeUrl(
+                originalInstance=self.modelXbrl,
+                targetInstance=formulaOutputInstance,
+                expectedInstanceUri=self.modelXbrl.modelManager.cntlr.webCache.normalizeUrl(
                     modelTestcaseVariation.resultXbrlInstanceUri,
                     baseForElement
                 ),
-                errorCaptureLevel,
-                errMsgPrefix
+                errorCaptureLevel=errorCaptureLevel,
+                matchById=not self.modelXbrl.hasFormulae
             )
             formulaOutputInstance.close()
             self.determineTestStatus(modelTestcaseVariation, compareErrors)

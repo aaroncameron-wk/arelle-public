@@ -213,7 +213,9 @@ def parseArgs(args):
                       dest="validateXmlOim",
                       help=_("Enables OIM validation for XML and iXBRL documents. OIM only formats (json, csv) are always OIM validated."))
     parser.add_option("--compareInstance", "--compareinstance", dest="compareInstance",
-                      help=_("Compare input instance against a given instance."))
+                      help=_("Compare instance facts against the instance loaded from the given URI."))
+    parser.add_option("--compareFormulaOutput", "--compareformulaoutput", dest="compareFormulaOutput",
+                      help=_("Compare formula output facts against the instance loaded from the given URI."))
     parser.add_option("--reportPackage", "--reportPackage",
                       action="store_true",
                       dest="reportPackage",
@@ -1157,27 +1159,6 @@ class CntlrCmdLine(Cntlr.Cntlr):
 
             else:
                 success = False
-            if success and options.compareInstance:
-                try:
-                    startedAt = time.time()
-                    modelXbrl = self.modelManager.modelXbrl
-                    compareErrors = compareInstance(
-                        modelXbrl,
-                        modelXbrl,
-                        options.compareInstance,
-                        self.errorManager._errorCaptureLevel,
-                        "ix"
-                    )
-                    self.errors.extend(compareErrors)
-                    compareTime = time.time() - startedAt
-                    modelXbrl.profileStat(_("compare"), loadTime)
-                except ModelDocument.LoadingException:
-                    success = False
-                except Exception as err:
-                    success = False
-                    self.addToLog(_("[Exception] Failed to load compare file: \n{0} \n{1}").format(
-                        err,
-                        traceback.format_tb(sys.exc_info()[2])))
             if success and options.diffFile and options.versReportFile:
                 try:
                     diffFilesource = FileSource.FileSource(options.diffFile,self)
@@ -1246,6 +1227,48 @@ class CntlrCmdLine(Cntlr.Cntlr):
                                                         else _("formula validation only in %.2f secs"),
                                                         time.time() - startedAt),
                                                         messageCode="info", file=self.entrypointFile)
+
+                        if options.compareFormulaOutput:
+                            try:
+                                startedAt = time.time()
+                                modelXbrl = self.modelManager.modelXbrl
+                                compareInstance(
+                                    originalInstance=modelXbrl,
+                                    targetInstance=modelXbrl.formulaOutputInstance,
+                                    expectedInstanceUri=options.compareFormulaOutput,
+                                    errorCaptureLevel=self.errorManager._errorCaptureLevel,
+                                    matchById=False,  # formula restuls have inconsistent IDs
+                                )
+                                compareTime = time.time() - startedAt
+                                modelXbrl.profileStat(_("compare formula output"), compareTime)
+                            except ModelDocument.LoadingException:
+                                success = False
+                            except Exception as err:
+                                success = False
+                                self.addToLog(_("[Exception] Failed to load compare file: \n{0} \n{1}").format(
+                                    err,
+                                    traceback.format_tb(sys.exc_info()[2])))
+
+                        if options.compareInstance:
+                            try:
+                                startedAt = time.time()
+                                modelXbrl = self.modelManager.modelXbrl
+                                compareInstance(
+                                    originalInstance=modelXbrl,
+                                    targetInstance=modelXbrl,
+                                    expectedInstanceUri=options.compareInstance,
+                                    errorCaptureLevel=self.errorManager._errorCaptureLevel,
+                                    matchById=True,
+                                )
+                                compareTime = time.time() - startedAt
+                                modelXbrl.profileStat(_("compare"), compareTime)
+                            except ModelDocument.LoadingException:
+                                success = False
+                            except Exception as err:
+                                success = False
+                                self.addToLog(_("[Exception] Failed to load compare file: \n{0} \n{1}").format(
+                                    err,
+                                    traceback.format_tb(sys.exc_info()[2])))
 
                         if options.testReport:
                             ViewFileTests.viewTests(self.modelManager.modelXbrl, options.testReport, options.testReportCols)

@@ -43,6 +43,7 @@ class RuntimeOptions:
     calcs: Optional[str] = None
     collectProfileStats: Optional[bool] = None
     compareInstance: Optional[str] = None
+    compareFormulaOutput: Optional[str] = None
     conceptsFile: Optional[str] = None
     deduplicateFacts: Optional[DeduplicationType] = None
     diagnostics: Optional[bool] = None

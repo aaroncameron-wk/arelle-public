@@ -33,29 +33,32 @@ def _factFootnotes(fact, footnotesRelSet):
     return footnotes
 
 
-def _compareInstance(modelXbrl: ModelXbrl, expectedInstance: ModelXbrl, targetInstance: ModelXbrl, errMsgPrefix):
+def _compareInstance(originalInstance: ModelXbrl, expectedInstance: ModelXbrl, targetInstance: ModelXbrl, matchById: bool) -> None:
+    if targetInstance is None:
+        originalInstance.error("arelle:targetModelNotLoaded",
+                        _("Target model for comparison was not loaded: %(file)s"),
+                        modelXbrl=originalInstance,
+                        file=originalInstance.uri)
+        return
     if expectedInstance.modelDocument is None:
-        modelXbrl.error("{}:expectedResultNotLoaded".format(errMsgPrefix),
-                        _("Testcase expected result instance not loaded: %(file)s"),
-                        modelXbrl=modelXbrl,
-                        file=modelXbrl.uri,
-                        messageCodes=("formula:expectedResultNotLoaded","ix:expectedResultNotLoaded"))
+        originalInstance.error("arelle:expectedResultNotLoaded",
+                        _("Expected result instance not loaded: %(file)s"),
+                        modelXbrl=originalInstance,
+                        file=originalInstance.uri)
         return
     for pluginXbrlMethod in pluginClassMethods("CompareInstance.Loaded"):
         pluginXbrlMethod(expectedInstance, targetInstance)
     if len(expectedInstance.facts) != len(targetInstance.facts):
-        targetInstance.error("{}:resultFactCounts".format(errMsgPrefix),
+        targetInstance.error("arelle:resultFactCounts",
                                     _("Found %(countFacts)s facts, expected %(expectedFacts)s facts"),
-                                    modelXbrl=modelXbrl, countFacts=len(targetInstance.facts),
-                                    expectedFacts=len(expectedInstance.facts),
-                                    messageCodes=("formula:resultFactCounts","ix:resultFactCounts"))
+                                    modelXbrl=originalInstance, countFacts=len(targetInstance.facts),
+                                    expectedFacts=len(expectedInstance.facts))
         return
     compareFootnotesRelSet = ModelRelationshipSet(targetInstance, "XBRL-footnotes")
     expectedFootnotesRelSet = ModelRelationshipSet(expectedInstance, "XBRL-footnotes")
-    _matchExpectedResultIDs = not modelXbrl.hasFormulae # formula restuls have inconsistent IDs
     for expectedInstanceFact in expectedInstance.facts:
         unmatchedFactsStack = []
-        compareFact = targetInstance.matchFact(expectedInstanceFact, unmatchedFactsStack, deemP0inf=True, matchId=_matchExpectedResultIDs, matchLang=False)
+        compareFact = targetInstance.matchFact(expectedInstanceFact, unmatchedFactsStack, deemP0inf=True, matchId=matchById, matchLang=False)
         if compareFact is None:
             if unmatchedFactsStack: # get missing nested tuple fact, if possible
                 missingFact = unmatchedFactsStack[-1]
@@ -64,32 +67,32 @@ def _compareInstance(modelXbrl: ModelXbrl, expectedInstance: ModelXbrl, targetIn
             # is it possible to show value mismatches?
             expectedFacts = targetInstance.factsByQname.get(missingFact.qname)
             if expectedFacts and len(expectedFacts) == 1:
-                targetInstance.error("{}:expectedFactMissing".format(errMsgPrefix),
+                targetInstance.error("arelle:expectedFactMissing",
                                             _("Output missing expected fact %(fact)s, extracted value \"%(value1)s\", expected value  \"%(value2)s\""),
-                                            modelXbrl=missingFact, fact=missingFact.qname, value1=missingFact.xValue, value2=next(iter(expectedFacts)).xValue,
-                                            messageCodes=("formula:expectedFactMissing","ix:expectedFactMissing"))
+                                            modelXbrl=missingFact, fact=missingFact.qname, value1=missingFact.xValue, value2=next(iter(expectedFacts)).xValue)
             else:
-                targetInstance.error("{}:expectedFactMissing".format(errMsgPrefix),
+                targetInstance.error("arelle:expectedFactMissing",
                                             _("Output missing expected fact %(fact)s"),
-                                            modelXbrl=missingFact, fact=missingFact.qname,
-                                            messageCodes=("formula:expectedFactMissing","ix:expectedFactMissing"))
+                                            modelXbrl=missingFact, fact=missingFact.qname)
         else: # compare footnotes
             expectedInstanceFactFootnotes = _factFootnotes(expectedInstanceFact, expectedFootnotesRelSet)
             compareFactFootnotes = _factFootnotes(compareFact, compareFootnotesRelSet)
             if (len(expectedInstanceFactFootnotes) != len(compareFactFootnotes) or
                     set(expectedInstanceFactFootnotes.values()) != set(compareFactFootnotes.values())):
-                targetInstance.error("{}:expectedFactFootnoteDifference".format(errMsgPrefix),
+                targetInstance.error("arelle:expectedFactFootnoteDifference",
                                             _("Output expected fact %(fact)s expected footnotes %(footnotes1)s produced footnotes %(footnotes2)s"),
-                                            modelXbrl=(compareFact,expectedInstanceFact), fact=expectedInstanceFact.qname, footnotes1=sorted(expectedInstanceFactFootnotes.items()), footnotes2=sorted(compareFactFootnotes.items()),
-                                            messageCodes=("formula:expectedFactFootnoteDifference","ix:expectedFactFootnoteDifference"))
+                                            modelXbrl=(compareFact,expectedInstanceFact),
+                                            fact=expectedInstanceFact.qname,
+                                            footnotes1=sorted(expectedInstanceFactFootnotes.items()),
+                                            footnotes2=sorted(compareFactFootnotes.items()))
 
 
-def compareInstance(modelXbrl: ModelXbrl, targetInstance: ModelXbrl, instanceUri: str, errorCaptureLevel, errMsgPrefix) -> list[str | None]:
-    expectedInstance = load(modelXbrl.modelManager,
-                                      instanceUri,
-                                      _("loading expected result XBRL instance"),
-                                      errorCaptureLevel=errorCaptureLevel)
-    _compareInstance(modelXbrl, expectedInstance, targetInstance, errMsgPrefix)
+def compareInstance(originalInstance: ModelXbrl, targetInstance: ModelXbrl, expectedInstanceUri: str, errorCaptureLevel: int, matchById: bool) -> list[str | None]:
+    expectedInstance = load(originalInstance.modelManager,
+                            expectedInstanceUri,
+                            _("loading expected result XBRL instance"),
+                            errorCaptureLevel=errorCaptureLevel)
+    _compareInstance(originalInstance, expectedInstance, targetInstance, matchById)
     expectedInstance.close()
     errors = targetInstance.errors
     return errors
