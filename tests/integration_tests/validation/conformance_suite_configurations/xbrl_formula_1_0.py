@@ -11,7 +11,7 @@ config = ConformanceSuiteConfig(
     compare_formula_output=True,
     expected_additional_testcase_errors={f'formula/tests/{s}': val for s, val in {
         '30000 Assertions/31140-ConsistencyAssertion-StaticAnalysis-missingFormulae/31140 Consistency Assertion Missing Formulae.xml:V-01': {
-            'arelle:targetModelNotLoaded': 1,
+            'compareInstance:targetModelNotLoaded': 1,
         },
     }.items()},
     expected_failure_ids=frozenset(f'formula/tests/{s}' for s in [
