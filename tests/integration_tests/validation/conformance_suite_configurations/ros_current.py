@@ -1,5 +1,5 @@
 from pathlib import PurePath, Path
-from tests.integration_tests.validation.conformance_suite_config import ConformanceSuiteConfig, ConformanceSuiteAssetConfig
+from tests.integration_tests.validation.conformance_suite_config import ConformanceSuiteConfig, ConformanceSuiteAssetConfig, CiConfig
 
 config = ConformanceSuiteConfig(
     assets=[
@@ -10,9 +10,9 @@ config = ConformanceSuiteConfig(
     ],
     base_taxonomy_validation='none',
     cache_version_id='gPspBVScQHwC33yT88cQcOK7nR5u3IRx',
+    ci_config=CiConfig(fast=False),
     disclosure_system='ros',
     info_url='https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/submitting-financial-statements/index.aspx',
     name=PurePath(__file__).stem,
     plugins=frozenset({'validate/ROS'}),
-    shards=4,
 )
