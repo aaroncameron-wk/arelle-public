@@ -643,14 +643,15 @@ class Validate:
             del inputDTSes # dereference
         if resultIsXbrlInstance and formulaOutputInstance and formulaOutputInstance.modelDocument:
             compareErrors = compareInstance(
-                originalInstance=self.modelXbrl,
+                modelManager=self.modelXbrl.modelManager,
+                originalInstance=modelXbrl,
                 targetInstance=formulaOutputInstance,
                 expectedInstanceUri=self.modelXbrl.modelManager.cntlr.webCache.normalizeUrl(
                     modelTestcaseVariation.resultXbrlInstanceUri,
                     baseForElement
                 ),
                 errorCaptureLevel=errorCaptureLevel,
-                matchById=not self.modelXbrl.hasFormulae
+                matchById=not modelXbrlHasFormulae
             )
             formulaOutputInstance.close()
             self.determineTestStatus(modelTestcaseVariation, compareErrors)

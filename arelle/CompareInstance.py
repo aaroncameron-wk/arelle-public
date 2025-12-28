@@ -1,6 +1,9 @@
 """
 See COPYRIGHT.md for copyright information.
 """
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from arelle.ModelDtsObject import ModelResource
 from arelle.ModelInstanceObject import ModelFact
@@ -10,10 +13,13 @@ from arelle.PluginManager import pluginClassMethods
 from arelle.XmlUtil import collapseWhitespace
 from arelle.typing import TypeGetText
 
+if TYPE_CHECKING:
+    from arelle.ModelManager import ModelManager
+
 _: TypeGetText
 
 
-def _factFootnotes(fact, footnotesRelSet):
+def _factFootnotes(fact: ModelFact, footnotesRelSet: ModelRelationshipSet) -> dict[str, str]:
     footnotes = {}
     footnoteRels = footnotesRelSet.fromModelObject(fact)
     if footnoteRels:
@@ -35,13 +41,13 @@ def _factFootnotes(fact, footnotesRelSet):
 
 def _compareInstance(originalInstance: ModelXbrl, expectedInstance: ModelXbrl, targetInstance: ModelXbrl, matchById: bool) -> None:
     if targetInstance is None:
-        originalInstance.error("arelle:targetModelNotLoaded",
-                        _("Target model for comparison was not loaded: %(file)s"),
+        originalInstance.error("compareInstance:targetInstanceNotLoaded",
+                        _("Target instance for comparison was not loaded: %(file)s"),
                         modelXbrl=originalInstance,
                         file=originalInstance.uri)
         return
     if expectedInstance.modelDocument is None:
-        originalInstance.error("arelle:expectedResultNotLoaded",
+        originalInstance.error("compareInstance:expectedResultNotLoaded",
                         _("Expected result instance not loaded: %(file)s"),
                         modelXbrl=originalInstance,
                         file=originalInstance.uri)
@@ -49,15 +55,15 @@ def _compareInstance(originalInstance: ModelXbrl, expectedInstance: ModelXbrl, t
     for pluginXbrlMethod in pluginClassMethods("CompareInstance.Loaded"):
         pluginXbrlMethod(expectedInstance, targetInstance)
     if len(expectedInstance.facts) != len(targetInstance.facts):
-        targetInstance.error("arelle:resultFactCounts",
+        targetInstance.error("compareInstance:resultFactCounts",
                                     _("Found %(countFacts)s facts, expected %(expectedFacts)s facts"),
                                     modelXbrl=originalInstance, countFacts=len(targetInstance.facts),
                                     expectedFacts=len(expectedInstance.facts))
         return
-    compareFootnotesRelSet = ModelRelationshipSet(targetInstance, "XBRL-footnotes")
-    expectedFootnotesRelSet = ModelRelationshipSet(expectedInstance, "XBRL-footnotes")
+    compareFootnotesRelSet = ModelRelationshipSet(targetInstance, "XBRL-footnotes")  # type: ignore[no-untyped-call]
+    expectedFootnotesRelSet = ModelRelationshipSet(expectedInstance, "XBRL-footnotes")  # type: ignore[no-untyped-call]
     for expectedInstanceFact in expectedInstance.facts:
-        unmatchedFactsStack = []
+        unmatchedFactsStack: list[ModelFact] = []
         compareFact = targetInstance.matchFact(expectedInstanceFact, unmatchedFactsStack, deemP0inf=True, matchId=matchById, matchLang=False)
         if compareFact is None:
             if unmatchedFactsStack: # get missing nested tuple fact, if possible
@@ -67,11 +73,11 @@ def _compareInstance(originalInstance: ModelXbrl, expectedInstance: ModelXbrl, t
             # is it possible to show value mismatches?
             expectedFacts = targetInstance.factsByQname.get(missingFact.qname)
             if expectedFacts and len(expectedFacts) == 1:
-                targetInstance.error("arelle:expectedFactMissing",
+                targetInstance.error("compareInstance:expectedFactMissing",
                                             _("Output missing expected fact %(fact)s, extracted value \"%(value1)s\", expected value  \"%(value2)s\""),
                                             modelXbrl=missingFact, fact=missingFact.qname, value1=missingFact.xValue, value2=next(iter(expectedFacts)).xValue)
             else:
-                targetInstance.error("arelle:expectedFactMissing",
+                targetInstance.error("compareInstance:expectedFactMissing",
                                             _("Output missing expected fact %(fact)s"),
                                             modelXbrl=missingFact, fact=missingFact.qname)
         else: # compare footnotes
@@ -79,7 +85,7 @@ def _compareInstance(originalInstance: ModelXbrl, expectedInstance: ModelXbrl, t
             compareFactFootnotes = _factFootnotes(compareFact, compareFootnotesRelSet)
             if (len(expectedInstanceFactFootnotes) != len(compareFactFootnotes) or
                     set(expectedInstanceFactFootnotes.values()) != set(compareFactFootnotes.values())):
-                targetInstance.error("arelle:expectedFactFootnoteDifference",
+                targetInstance.error("compareInstance:expectedFactFootnoteDifference",
                                             _("Output expected fact %(fact)s expected footnotes %(footnotes1)s produced footnotes %(footnotes2)s"),
                                             modelXbrl=(compareFact,expectedInstanceFact),
                                             fact=expectedInstanceFact.qname,
@@ -87,8 +93,15 @@ def _compareInstance(originalInstance: ModelXbrl, expectedInstance: ModelXbrl, t
                                             footnotes2=sorted(compareFactFootnotes.items()))
 
 
-def compareInstance(originalInstance: ModelXbrl, targetInstance: ModelXbrl, expectedInstanceUri: str, errorCaptureLevel: int, matchById: bool) -> list[str | None]:
-    expectedInstance = load(originalInstance.modelManager,
+def compareInstance(
+        modelManager: ModelManager,
+        originalInstance: ModelXbrl,
+        targetInstance: ModelXbrl,
+        expectedInstanceUri: str,
+        errorCaptureLevel: int,
+        matchById: bool
+) -> list[str | None]:
+    expectedInstance = load(modelManager,
                             expectedInstanceUri,
                             _("loading expected result XBRL instance"),
                             errorCaptureLevel=errorCaptureLevel)

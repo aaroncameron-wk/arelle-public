@@ -1233,6 +1233,7 @@ class CntlrCmdLine(Cntlr.Cntlr):
                                 startedAt = time.time()
                                 modelXbrl = self.modelManager.modelXbrl
                                 compareInstance(
+                                    modelManager=modelXbrl.modelManager,
                                     originalInstance=modelXbrl,
                                     targetInstance=modelXbrl.formulaOutputInstance,
                                     expectedInstanceUri=options.compareFormulaOutput,
@@ -1254,6 +1255,7 @@ class CntlrCmdLine(Cntlr.Cntlr):
                                 startedAt = time.time()
                                 modelXbrl = self.modelManager.modelXbrl
                                 compareInstance(
+                                    modelManager=modelXbrl.modelManager,
                                     originalInstance=modelXbrl,
                                     targetInstance=modelXbrl,
                                     expectedInstanceUri=options.compareInstance,
