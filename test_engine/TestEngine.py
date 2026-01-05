@@ -54,28 +54,6 @@ def _hardcodedMatch(expected: str, actual: str) -> bool:
     )
 
 
-def _longestCommonPrefix(values: list[str]) -> str:
-    if not values:
-        return ""
-    values = sorted(values)
-    first = Path(values[0]).parts
-    last = Path(values[-1]).parts
-
-    # Use zip to iterate through characters of both strings simultaneously
-    prefix = []
-    for char1, char2 in zip(first, last):
-        if char1 == char2:
-            prefix.append(char1)
-        else:
-            break
-    return str(Path(*prefix)) + os.sep
-
-
-def _longestCommonSuffix(values: list[str]) -> str:
-    values = [v[::-1] for v in values]
-    return _longestCommonPrefix(values)[::-1]
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -165,11 +143,9 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
             for doc in model.urlDocs.values():
                 if hasattr(doc, 'testcaseVariations') and doc.testcaseVariations is not None:
                     docs.append(doc)
-        uris = [doc.uri for doc in docs]
-        prefix = _longestCommonPrefix(uris)
-        suffix = _longestCommonSuffix(uris)
         for doc in docs:
-            docUri = (doc.uri + os.sep).removeprefix(prefix).removesuffix(suffix).strip(os.sep)
+            docPath = Path(doc.uri)
+            docPath = docPath.relative_to(CWD) if docPath.is_relative_to(CWD) else docPath
             for testcaseVariation in doc.testcaseVariations:
                 inlineTargets = [instElt.get("target")
                                for resultElt in testcaseVariation.iterdescendants("{*}result")
@@ -292,7 +268,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                         description=testcaseVariation.description,
                         base=base,
                         readFirstUris=testcaseVariation.readMeFirstUris,
-                        shortName=f"{docUri}:{localId}",
+                        shortName=f"{docPath}:{localId}",
                         status=testcaseVariation.status,
                         testcaseConstraintSet=testcaseConstraintSet,
                         blockedCodePattern=blockedCodePattern,
