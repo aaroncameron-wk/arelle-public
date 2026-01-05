@@ -39,6 +39,20 @@ DEFAULT_PLUGIN_OPTIONS = {
         "xule_rule_stats_log": True,
     }
 }
+PROHIBITED_PLUGIN_OPTIONS = frozenset({
+    'inlineTarget',
+})
+PROHIBITED_RUNTIME_OPTIONS = frozenset({
+    'calcs',
+    'compareFormulaOutput',
+    'compareInstance',
+    'entrypointFile',
+    'keepOpen',
+    'logFile',
+    'parameterSeparator',
+    'parameters',
+    'validate',
+})
 
 
 def _hardcodedMatch(expected: str, actual: str) -> bool:
@@ -343,10 +357,16 @@ def runTestcaseVariation(
         Path(testcaseVariation.base).parent.joinpath(Path(readMeFirstUri))
         for readMeFirstUri in testcaseVariation.readFirstUris
     ])
+
     dynamicOptions = dict(testEngineOptions.options)
+    for prohibitedOption in PROHIBITED_RUNTIME_OPTIONS:
+        assert prohibitedOption not in dynamicOptions, f'The option "{prohibitedOption}" is reserved by the test engine.'
     if not dynamicOptions.get('pluginOptions'):
         dynamicOptions['pluginOptions'] = {}
     pluginOptions = dynamicOptions['pluginOptions']
+    for prohibitedOption in PROHIBITED_PLUGIN_OPTIONS:
+        assert prohibitedOption not in pluginOptions, f'The plugin option "{prohibitedOption}" is reserved by the test engine.'
+
     if testcaseVariation.calcMode is not None:
         dynamicOptions['calcs'] = testcaseVariation.calcMode
     if 'plugins' in dynamicOptions:
@@ -360,6 +380,8 @@ def runTestcaseVariation(
     runtimeOptions = RuntimeOptions(
         entrypointFile=entrypointFile,
         logFile=normPath(testEngineOptions.logDirectory / f"{logFilename(testcaseVariation.shortName)}-log.txt"),
+        keepOpen=True,
+        validate=True,
         parameters=testcaseVariation.parameters,
         parameterSeparator=PARAMETER_SEPARATOR,
         compareFormulaOutput=normPath(testcaseVariation.compareFormulaOutputUri) if testcaseVariation.compareFormulaOutputUri else None,

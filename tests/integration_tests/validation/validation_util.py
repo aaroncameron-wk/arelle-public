@@ -586,10 +586,7 @@ def get_test_engine_runtime_options(
     if build_cache:
         optional_plugins.add('CacheBuilder')
     plugins = config.plugins | additional_plugins | optional_plugins
-    args: dict[str, Any] = {
-        'validate': True,
-        'keepOpen': True,  # Session API requires keepOpen to retrieve model data.
-    }
+    args: dict[str, Any] = {}
     plugin_options = {}
     if config.base_taxonomy_validation:
         args['baseTaxonomyValidationMode'] = config.base_taxonomy_validation
