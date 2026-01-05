@@ -19,7 +19,7 @@ class TestEngineOptions:
     filters: list[str]
     ignoreLevels: frozenset[ErrorLevel]
     indexFile: str
-    logDirectory: Path
+    logDirectory: Path | None
     matchAll: bool
     name: str | None
     options: dict[str, Any]

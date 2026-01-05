@@ -410,7 +410,7 @@ def get_test_engine_test_results_with_shards(
 
         runtime_options = get_test_engine_runtime_options(
             config=config, additional_plugins=additional_plugins,
-            build_cache=build_cache, offline=offline, log_to_file=log_to_file, shard=shard_id,
+            build_cache=build_cache, offline=offline, shard=shard_id,
         )
         test_engine_options = TestEngineOptions(
             additionalConstraints=_get_additional_constraints(config),
@@ -419,7 +419,7 @@ def get_test_engine_test_results_with_shards(
             filters=testcase_filters,
             ignoreLevels=config.ignore_levels,
             indexFile=str(config.entry_point_path),
-            logDirectory=Path('conf-logs') / config.name,
+            logDirectory=(Path('conf-logs') / config.name) if log_to_file else None,
             matchAll=config.test_case_result_options == 'match-all',
             name=config.name,
             options=runtime_options,
@@ -469,7 +469,7 @@ def get_test_engine_test_results_without_shards(
     additional_plugins = frozenset().union(*(plugins for _, plugins in config.additional_plugins_by_prefix))
     runtime_options = get_test_engine_runtime_options(
         config=config, additional_plugins=additional_plugins,
-        build_cache=build_cache, offline=offline, log_to_file=log_to_file, shard=None,
+        build_cache=build_cache, offline=offline, shard=None,
     )
     return get_test_engine_data(
         test_engine_options=TestEngineOptions(
@@ -479,7 +479,7 @@ def get_test_engine_test_results_without_shards(
             filters=testcase_filters or [],
             ignoreLevels=config.ignore_levels,
             indexFile=str(config.entry_point_path),
-            logDirectory=Path('conf-logs') / config.name,
+            logDirectory=(Path('conf-logs') / config.name) if log_to_file else None,
             matchAll=config.test_case_result_options == 'match-all',
             name=config.name,
             options=runtime_options,
@@ -578,7 +578,6 @@ def get_test_engine_runtime_options(
         additional_plugins: frozenset[str],
         build_cache: bool,
         offline: bool,
-        log_to_file: bool,
         shard: int | None,
 ) -> dict[str, Any]:
     use_shards = shard is not None

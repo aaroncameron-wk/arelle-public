@@ -379,9 +379,9 @@ def runTestcaseVariation(
     entrypointFile = '|'.join(entrypointUris)
     runtimeOptions = RuntimeOptions(
         entrypointFile=entrypointFile,
-        logFile=normPath(testEngineOptions.logDirectory / f"{logFilename(testcaseVariation.shortName)}-log.txt"),
         keepOpen=True,
         validate=True,
+        logFile=normPath(testEngineOptions.logDirectory / f"{logFilename(testcaseVariation.shortName)}-log.txt") if testEngineOptions.logDirectory else None,
         parameters=testcaseVariation.parameters,
         parameterSeparator=PARAMETER_SEPARATOR,
         compareFormulaOutput=normPath(testcaseVariation.compareFormulaOutputUri) if testcaseVariation.compareFormulaOutputUri else None,
@@ -650,7 +650,7 @@ if __name__ == "__main__":
         filters=args.filters,
         ignoreLevels=frozenset(), # TODO: CLI arg
         indexFile=args.index,
-        logDirectory=Path(args.log_directory),
+        logDirectory=Path(args.log_directory) if args.log_directory else None,
         matchAll=args.match_all,
         name=None,
         options=json.loads(args.options),
