@@ -19,7 +19,8 @@ from arelle.ModelValue import QName
 from arelle.RuntimeOptions import RuntimeOptions
 from arelle.UrlUtil import IXDS_DOC_SEPARATOR, IXDS_SURROGATE
 from arelle.api.Session import Session
-from test_engine.ActualError import ActualError, ErrorLevel
+from test_engine.ActualError import ActualError
+from test_engine.ErrorLevel import ErrorLevel
 from test_engine.TestEngineOptions import TestEngineOptions
 from test_engine.TestcaseConstraint import TestcaseConstraint
 from test_engine.TestcaseConstraintResult import TestcaseConstraintResult
@@ -527,7 +528,9 @@ def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[Actu
 def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dict[tuple[str | QName, ErrorLevel], int] ) -> dict[tuple[str | QName, ErrorLevel], int]:
     diff = {}
     for constraint in testcaseConstraintSet.constraints:
-        constraintKey = (constraint.qname or constraint.pattern, constraint.level)
+        keyVal = constraint.qname or constraint.pattern
+        assert keyVal is not None
+        constraintKey = (keyVal, constraint.level)
         matchCount = 0
         for actualKey, count in actualErrorCounts.items():
             actualError, level = actualKey
@@ -656,4 +659,3 @@ if __name__ == "__main__":
         options=json.loads(args.options),
         parallel=args.parallel,
     ))
-

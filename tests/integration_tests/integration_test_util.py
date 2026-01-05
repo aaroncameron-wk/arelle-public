@@ -193,8 +193,8 @@ def get_test_engine_data(
     try:
         system_locale = locale.setlocale(locale.LC_CTYPE)
         results: list[ParameterSet] = []
-        test_cases_with_no_variations = set()
-        test_cases_with_unrecognized_type = {}
+        test_cases_with_no_variations: set[str] = set()
+        test_cases_with_unrecognized_type: dict[str, ModelDocument.Type] = {}
         test_cases: list[ModelDocument.ModelDocument] = []
 
         # TODO:

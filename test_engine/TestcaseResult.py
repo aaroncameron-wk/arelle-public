@@ -36,11 +36,11 @@ class TestcaseResult:
             f"\tDuration: {self.duration_seconds:.2f} seconds\n"
             f"\tExpected:\n" +
             ("\n".join(f"\t\t {e}" for e in self.appliedConstraintSet.constraints) if self.appliedConstraintSet.constraints else "\t\t None") + "\n"
-            f"\tActual:\n" +
+            "\tActual:\n" +
             ("\n".join(f"\t\t {e.qname or e.code}" for e in self.actualErrors) if self.actualErrors else "\t\t None") + "\n"
-            f"\tBlocked:\n" +
+            "\tBlocked:\n" +
             ("\n".join(f"\t\t {e}: {c}" for e, c in self.blockedErrors.items()) if self.blockedErrors else "\t\t None") + "\n"
-            f"\tResults:\n" +
+            "\tResults:\n" +
             ("\n".join(f"\t\t {r}" for r in self.constraintResults) if self.constraintResults else "\t\t None")
         )
 

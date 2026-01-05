@@ -15,7 +15,7 @@ class TestcaseConstraintResult:
 
     def __str__(self) -> str:
         if self.diff == 0:
-            message = f'Matched'
+            message = 'Matched'
         elif self.diff < 0:
             message = f'Missing {abs(self.diff)} expected'
         else:

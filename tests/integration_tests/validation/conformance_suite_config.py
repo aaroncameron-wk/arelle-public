@@ -249,7 +249,7 @@ class ConformanceSuiteConfig:
         assert not overlapping_expected_failure_testcase_ids, \
             f'Testcase IDs in both expected failures and expected additional errors: {sorted(overlapping_expected_failure_testcase_ids)}'
         assert 'plugins' not in self.runtime_options, \
-            f'"plugins" must not be in runtime_options, use plugins field instead.'
+            '"plugins" must not be in runtime_options, use plugins field instead.'
         if self.shards > 1:
             ci_core_counts = set(OS_CORES.values())
             assert any(self.shards % core_count == 0 for core_count in ci_core_counts), \
