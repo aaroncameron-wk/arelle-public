@@ -344,8 +344,9 @@ def runTestcaseVariation(
         for readMeFirstUri in testcaseVariation.readFirstUris
     ])
     dynamicOptions = dict(testEngineOptions.options)
-    pluginOptions = {}
-    dynamicOptions['pluginOptions'] = pluginOptions
+    if not dynamicOptions.get('pluginOptions'):
+        dynamicOptions['pluginOptions'] = {}
+    pluginOptions = dynamicOptions['pluginOptions']
     if testcaseVariation.calcMode is not None:
         dynamicOptions['calcs'] = testcaseVariation.calcMode
     if 'plugins' in dynamicOptions:
