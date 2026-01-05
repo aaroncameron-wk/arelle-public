@@ -306,7 +306,7 @@ def filterTestcaseVariation(testcaseVariation: TestcaseVariation, filters: list[
 
 
 def logFilename(name: str) -> str:
-    name = re.sub(r'[<>:"/\\|?*\x00-\x1F]', '_', name)
+    name = re.sub(r'[<>:"|?*\x00-\x1F]', '_', name)
     return name.strip().strip('.')
 
 def buildActualError(
@@ -368,6 +368,7 @@ def runTestcaseVariation(
     )
     runtimeOptionsJson = json.dumps({k: v for k, v in vars(runtimeOptions).items() if v is not None}, indent=4, sort_keys=True)
     if runtimeOptions.logFile is not None:
+        Path(runtimeOptions.logFile).parent.mkdir(parents=True, exist_ok=True)
         with open(runtimeOptions.logFile, 'w') as f:
             f.write(f'Running [{testcaseVariation.fullId}] with options:\n{runtimeOptionsJson}\n------\n')
     with Session() as session:
