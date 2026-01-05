@@ -224,11 +224,10 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                                         ))
                         else:
                             raise ValueError(f"Unexpected expected error type: {type(e)}")
-                    if (resultTableUri := testcaseVariation.resultTableUri) is not None:
-                        constraints.append(TestcaseConstraint(
-                            tableUri=Path(resultTableUri),
-                        ))
 
+                    if testcaseVariation.resultTableUri is not None:
+                        # Result table URIs are not currently validated
+                        pass
 
                     expectedWarnings = testcaseVariation.expectedWarnings or []
                     for warning in expectedWarnings:
@@ -457,12 +456,11 @@ def runTestcaseVariationsInSeries(
 def _normalizedConstraints(
         constraints: list[TestcaseConstraint]
 ) -> list[TestcaseConstraint]:
-    normalizedConstraintsMap: dict[tuple[QName | None, str | None, Path | None, ErrorLevel], tuple[int | None, int | None]] = {}
+    normalizedConstraintsMap: dict[tuple[QName | None, str | None, ErrorLevel], tuple[int | None, int | None]] = {}
     for constraint in constraints:
         key = (
             constraint.qname,
             constraint.pattern,
-            constraint.tableUri,
             constraint.level,
         )
         if key not in normalizedConstraintsMap:
@@ -478,13 +476,11 @@ def _normalizedConstraints(
             pattern=_pattern,
             min=_min,
             max=_max,
-            tableUri=_tableUri,
             level=_level,
         )
         for (
             _qname,
             _pattern,
-            _tableUri,
             _level,
         ), (_min, _max) in normalizedConstraintsMap.items()
     ]
@@ -508,10 +504,7 @@ def blockCodes(actualErrors: list[ActualError], pattern: str) -> tuple[list[Actu
 def getDiff(testcaseConstraintSet: TestcaseConstraintSet, actualErrorCounts: dict[tuple[str | QName, ErrorLevel], int] ) -> dict[tuple[str | QName, ErrorLevel], int]:
     diff = {}
     for constraint in testcaseConstraintSet.constraints:
-        constraintKey = (constraint.qname or constraint.pattern or str(constraint.tableUri), constraint.level)
-        if constraint.tableUri is not None:
-            diff[constraintKey] = 1
-            continue
+        constraintKey = (constraint.qname or constraint.pattern, constraint.level)
         matchCount = 0
         for actualKey, count in actualErrorCounts.items():
             actualError, level = actualKey

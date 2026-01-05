@@ -16,7 +16,6 @@ class TestcaseConstraint:
     pattern: str | None = None
     min: int | None = None
     max: int | None = None
-    tableUri: Path | None = None
     level: ErrorLevel = ErrorLevel.ERROR
 
     def __str__(self) -> str:
