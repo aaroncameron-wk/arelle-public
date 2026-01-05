@@ -152,15 +152,12 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                 assert base is not None
                 if base.startswith("file:\\"):
                     base = base[6:]
-                # The ID to use for filtering. The final ID may include a target suffix, added below.
-                filterId = f"{base}:{testcaseVariation.id}"
-                if testEngineOptions.filters:
-                    if not any(fnmatch.fnmatch(filterId, _filter) for _filter in testEngineOptions.filters):
-                        continue # TODO: Only filter here
 
-                inlineTargets = [instElt.get("target")
-                               for resultElt in testcaseVariation.iterdescendants("{*}result")
-                               for instElt in resultElt.iterdescendants("{*}instance")] or [None]
+                inlineTargets = [
+                    instElt.get("target")
+                    for resultElt in testcaseVariation.iterdescendants("{*}result")
+                    for instElt in resultElt.iterdescendants("{*}instance")
+                ] or [None]
                 for inlineTarget in inlineTargets:
                     if len(inlineTargets) > 1 and inlineTarget is None:
                         inlineTarget = "(default)"
@@ -170,6 +167,10 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                         "and can not be included in a testcase variation ID."
                     localId = f"{testcaseVariation.id}" + (f"{TARGET_SUFFIX_SEPARATOR}{inlineTarget}" if inlineTarget else "")
                     fullId = f"{base}:{localId}"
+
+                    if testEngineOptions.filters:
+                        if not any(fnmatch.fnmatch(fullId, _filter) for _filter in testEngineOptions.filters):
+                            continue # TODO: Only filter here
 
                     # TODO: Improve
                     from arelle import XmlUtil

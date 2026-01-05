@@ -12,8 +12,9 @@ from collections import defaultdict
 from collections.abc import Generator
 from dataclasses import dataclass
 from heapq import heapreplace
+from lxml.etree import _Element
 from pathlib import PurePosixPath, Path
-from typing import Any, TYPE_CHECKING, cast
+from typing import Any, TYPE_CHECKING, cast, Iterable
 
 from lxml import etree
 
@@ -203,9 +204,9 @@ def _collect_zip_test_case_variation_ids(zip_file: zipfile.ZipFile, test_case_pa
         with zip_file.open(test_case_path) as f:
             tree = etree.parse(f)
         for variation in tree.findall('{*}variation'):
-            variation_id = variation.get('id')
-            assert variation_id and variation_id not in variation_ids
-            variation_ids.add(variation_id)
+            for variation_id in _iter_variation_test_case_variation_ids(variation):
+                assert variation_id and variation_id not in variation_ids
+                variation_ids.add(variation_id)
         testcase_variation_map[test_case_path] = sorted(variation_ids)
     return testcase_variation_map
 
@@ -224,11 +225,28 @@ def _collect_dir_test_case_variation_ids(file_path_prefix: str, test_case_paths:
         full_path = os.path.join(file_path_prefix, test_case_path)
         tree = etree.parse(full_path)
         for variation in tree.findall('{*}variation'):
-            variation_id = variation.get('id')
-            assert variation_id and variation_id not in variation_ids
-            variation_ids.add(variation_id)
+            for variation_id in _iter_variation_test_case_variation_ids(variation):
+                assert variation_id and variation_id not in variation_ids
+                variation_ids.add(variation_id)
         testcase_variation_map[test_case_path] = sorted(variation_ids)
     return testcase_variation_map
+
+
+def _iter_variation_test_case_variation_ids(variation: _Element) -> Iterable[str]:
+    variation_id = variation.get('id')
+    assert variation_id is not None
+    targets = {
+        instElt.get("target")
+        for resultElt in variation.iterdescendants("{*}result")
+        for instElt in resultElt.iterdescendants("{*}instance")
+    }
+    if len(targets) == 0 or targets == {None}:
+        yield variation_id
+    else:
+        for target in targets:
+            if target is None:
+                target = '(default)'
+            yield f'{variation_id}{TARGET_SUFFIX_SEPARATOR}{target}'
 
 
 def _collect_test_case_paths(file_path: str, tree: etree._ElementTree, path_strs: list[str]) -> Generator[str, None, None]:
@@ -449,7 +467,6 @@ def get_test_engine_test_results_with_shards(
     for result in results:
         for testcase_filter in matched_testcase_filters:
             result_id = result.id.rsplit('::', 1)[-1]
-            result_id = result_id.split(TARGET_SUFFIX_SEPARATOR, 1)[0]
             if fnmatch.fnmatch(result_id, testcase_filter):
                 matched_testcase_filters.remove(testcase_filter)
                 break
