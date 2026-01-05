@@ -131,7 +131,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
         # disablePersistentConfig=True,
         # validate=True,
     )
-    with (Session() as session):
+    with Session() as session:
         session.run(
             runtimeOptions,
             # logHandler=StructuredMessageLogHandler(), TODO
