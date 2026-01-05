@@ -19,6 +19,7 @@ from lxml import etree
 
 from arelle.WebCache import WebCache
 from test_engine import TestEngine
+from test_engine.TestEngine import TARGET_SUFFIX_SEPARATOR
 from test_engine.TestEngineOptions import TestEngineOptions
 from test_engine.TestcaseConstraint import TestcaseConstraint
 from test_engine.TestcaseConstraintSet import TestcaseConstraintSet
@@ -118,6 +119,13 @@ def get_test_shards(config: ConformanceSuiteConfig) -> list[Shard]:
     assert shards_by_plugins.keys() == {()} | {tuple(plugins) for _, plugins in config.additional_plugins_by_prefix}
     shards = _build_shards(shards_by_plugins)
     _verify_shards(shards, testcase_variation_map, empty_testcase_paths)
+    all_ids = [
+        f'{path}:{vid}'
+        for shard in shards
+        for path, vids in shard.paths.items()
+        for vid in vids
+    ]
+    print(f'All IDS: {json.dumps(all_ids, indent=2, sort_keys=True)}')
     return shards
 
 
@@ -433,8 +441,25 @@ def get_test_engine_test_results_with_shards(
             merged_results[result_id] = result
     results = list(sorted(merged_results.values(), key=lambda x: str(x.id)))
 
-    assert sum(1 for r in results if cast(dict[str, Any], r.values[0]).get('status') != 'skip') == len(all_testcase_filters), \
-        f'Expected {len(all_testcase_filters)} results based on testcase filters, received {len(results)}'
+    # Because of multi-target testcase variations being split into separate cases per-target,
+    # one variation may map to more than one result.
+    # However, we should never have *fewer* results than expected.
+    print(f'Results ({len(results)}): {json.dumps(list(sorted(result.id for result in results)), indent=2)}')
+    matched_testcase_filters = set(all_testcase_filters)
+    for result in results:
+        for testcase_filter in matched_testcase_filters:
+            result_id = result.id.rsplit('::', 1)[-1]
+            result_id = result_id.split(TARGET_SUFFIX_SEPARATOR, 1)[0]
+            if fnmatch.fnmatch(result_id, testcase_filter):
+                matched_testcase_filters.remove(testcase_filter)
+                break
+    print(f'Unmatched filters ({len(matched_testcase_filters)}): {json.dumps(list(sorted(matched_testcase_filters)), indent=2)}')
+
+    expected_result_count = len(all_testcase_filters)
+    actual_result_count = sum(1 for r in results if cast(dict[str, Any], r.values[0]).get('status') != 'skip')
+    assert actual_result_count >= expected_result_count, \
+        f'Expected at least {expected_result_count} results based on testcase filters, received {actual_result_count}'
+
     return results
 
 

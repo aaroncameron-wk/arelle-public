@@ -29,6 +29,7 @@ from test_engine.TestcaseVariation import TestcaseVariation
 
 CWD = Path.cwd()
 PARAMETER_SEPARATOR = '\n'
+TARGET_SUFFIX_SEPARATOR = '|'
 DEFAULT_PLUGIN_OPTIONS = {
     'EDGAR/render': {
         'keepFilingOpen': True,
@@ -130,7 +131,7 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
         # disablePersistentConfig=True,
         # validate=True,
     )
-    with Session() as session:
+    with (Session() as session):
         session.run(
             runtimeOptions,
             # logHandler=StructuredMessageLogHandler(), TODO
@@ -147,6 +148,16 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
             docPath = Path(doc.uri)
             docPath = docPath.relative_to(CWD) if docPath.is_relative_to(CWD) else docPath
             for testcaseVariation in doc.testcaseVariations:
+                base = testcaseVariation.base
+                assert base is not None
+                if base.startswith("file:\\"):
+                    base = base[6:]
+                # The ID to use for filtering. The final ID may include a target suffix, added below.
+                filterId = f"{base}:{testcaseVariation.id}"
+                if testEngineOptions.filters:
+                    if not any(fnmatch.fnmatch(filterId, _filter) for _filter in testEngineOptions.filters):
+                        continue # TODO: Only filter here
+
                 inlineTargets = [instElt.get("target")
                                for resultElt in testcaseVariation.iterdescendants("{*}result")
                                for instElt in resultElt.iterdescendants("{*}instance")] or [None]
@@ -154,15 +165,11 @@ def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> 
                     if len(inlineTargets) > 1 and inlineTarget is None:
                         inlineTarget = "(default)"
                     testcaseVariation.ixdsTarget = inlineTarget
-                    base = testcaseVariation.base
-                    assert base is not None
-                    if base.startswith("file:\\"):
-                        base = base[6:]
-                    localId = f"{testcaseVariation.id}" + (f"_{inlineTarget}" if inlineTarget else "")
+                    assert TARGET_SUFFIX_SEPARATOR not in testcaseVariation.id, \
+                        f"The '{TARGET_SUFFIX_SEPARATOR}' character is used internally as a separator " + \
+                        "and can not be included in a testcase variation ID."
+                    localId = f"{testcaseVariation.id}" + (f"{TARGET_SUFFIX_SEPARATOR}{inlineTarget}" if inlineTarget else "")
                     fullId = f"{base}:{localId}"
-                    if testEngineOptions.filters:
-                        if not any(fnmatch.fnmatch(fullId, filter) for filter in testEngineOptions.filters):
-                            continue # TODO: Only filter here
 
                     # TODO: Improve
                     from arelle import XmlUtil
