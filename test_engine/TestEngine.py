@@ -44,7 +44,6 @@ PROHIBITED_PLUGIN_OPTIONS = frozenset({
     'inlineTarget',
 })
 PROHIBITED_RUNTIME_OPTIONS = frozenset({
-    'calcs',
     'compareFormulaOutput',
     'compareInstance',
     'entrypointFile',
@@ -369,6 +368,8 @@ def runTestcaseVariation(
         assert prohibitedOption not in pluginOptions, f'The plugin option "{prohibitedOption}" is reserved by the test engine.'
 
     if testcaseVariation.calcMode is not None:
+        assert dynamicOptions.get('calcs', testcaseVariation.calcMode) == testcaseVariation.calcMode, \
+            'Conflicting "calcs" values from testcase variation and user input.'
         dynamicOptions['calcs'] = testcaseVariation.calcMode
     if 'plugins' in dynamicOptions:
         for plugin in dynamicOptions['plugins'].split('|'):
