@@ -4,6 +4,9 @@ from tests.integration_tests.validation.conformance_suite_config import Conforma
 ZIP_PATH = Path("taxonomy-package-conformance.zip")
 EXTRACTED_PATH = Path(ZIP_PATH.stem)
 config = ConformanceSuiteConfig(
+    args=[
+        "--taxonomyPackage"
+    ],
     assets=[
         ConformanceSuiteAssetConfig.nested_conformance_suite(
             ZIP_PATH,
