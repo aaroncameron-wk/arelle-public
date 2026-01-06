@@ -22,6 +22,9 @@ config = ConformanceSuiteConfig(
         package for year in [2017, 2019, 2020, 2021, 2022] for package in ESEF_PACKAGES[year]
     ],
     base_taxonomy_validation='none',
+    custom_compare_patterns=[
+        (r"^.*$", r"^ESEF\..*\.~$"),
+    ],
     disclosure_system='esef-2022',
     expected_failure_ids=frozenset(f'esef_conformance_suite_2022/tests/{s}' for s in [
         # The following test cases fail because of the `tech_duplicated_facts1` formula which fires
