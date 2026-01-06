@@ -139,4 +139,5 @@ config = ConformanceSuiteConfig(
         'reportPackage': True,
         'taxonomyPackage': True,
     },
+    test_case_result_options='match-all', # README.md in suite says match-any is fine, but we can be more strict.
 )
