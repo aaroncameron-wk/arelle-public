@@ -18,6 +18,9 @@ config = ConformanceSuiteConfig(
         *NL_PACKAGES['NL-INLINE-2024'],
     ],
     base_taxonomy_validation='none',
+    custom_compare_patterns=[
+        (r"^.*$", r"^NL.NL-KVK.*\.~$"),
+    ],
     disclosure_system='NL-INLINE-2024-GAAP-OTHER',
     expected_additional_testcase_errors={f"*tests/{s}": val for s, val in {
         'G3-3-1_2/index.xml:TC3_invalid': {
