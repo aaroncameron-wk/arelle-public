@@ -12,12 +12,19 @@ from collections import defaultdict
 from collections.abc import Generator
 from dataclasses import dataclass
 from heapq import heapreplace
+from lxml.etree import _Element
 from pathlib import PurePosixPath, Path
-from typing import Any, TYPE_CHECKING, cast
+from typing import Any, TYPE_CHECKING, cast, Iterable
 
 from lxml import etree
 
-from tests.integration_tests.integration_test_util import get_test_data
+from arelle.WebCache import WebCache
+from test_engine import TestEngine
+from test_engine.TestEngine import TARGET_SUFFIX_SEPARATOR
+from test_engine.TestEngineOptions import TestEngineOptions
+from test_engine.TestcaseConstraint import TestcaseConstraint
+from test_engine.TestcaseConstraintSet import TestcaseConstraintSet
+from tests.integration_tests.integration_test_util import get_test_data, get_test_engine_data
 from tests.integration_tests.validation.conformance_suite_config import ConformanceSuiteConfig
 
 if TYPE_CHECKING:
@@ -37,6 +44,11 @@ class Shard:
 def get_test_data_mp_wrapper(args_kws: tuple[list[Any], dict[str, Any]]) -> list[ParameterSet]:
     args, kws = args_kws
     return get_test_data(args, **kws)
+
+
+def get_test_engine_mp_wrapper(args_kws: tuple[TestEngineOptions, dict[str, Any]]) -> list[ParameterSet]:
+    args, kws = args_kws
+    return get_test_engine_data(args, **kws)
 
 
 def get_testcase_variation_map(config: ConformanceSuiteConfig) -> dict[str, list[str]]:
@@ -185,9 +197,9 @@ def _collect_zip_test_case_variation_ids(zip_file: zipfile.ZipFile, test_case_pa
         with zip_file.open(test_case_path) as f:
             tree = etree.parse(f)
         for variation in tree.findall('{*}variation'):
-            variation_id = variation.get('id')
-            assert variation_id and variation_id not in variation_ids
-            variation_ids.add(variation_id)
+            for variation_id in _iter_variation_test_case_variation_ids(variation):
+                assert variation_id and variation_id not in variation_ids
+                variation_ids.add(variation_id)
         testcase_variation_map[test_case_path] = sorted(variation_ids)
     return testcase_variation_map
 
@@ -206,11 +218,28 @@ def _collect_dir_test_case_variation_ids(file_path_prefix: str, test_case_paths:
         full_path = os.path.join(file_path_prefix, test_case_path)
         tree = etree.parse(full_path)
         for variation in tree.findall('{*}variation'):
-            variation_id = variation.get('id')
-            assert variation_id and variation_id not in variation_ids
-            variation_ids.add(variation_id)
+            for variation_id in _iter_variation_test_case_variation_ids(variation):
+                assert variation_id and variation_id not in variation_ids
+                variation_ids.add(variation_id)
         testcase_variation_map[test_case_path] = sorted(variation_ids)
     return testcase_variation_map
+
+
+def _iter_variation_test_case_variation_ids(variation: _Element) -> Iterable[str]:
+    variation_id = variation.get('id')
+    assert variation_id is not None
+    targets = {
+        instElt.get("target")
+        for resultElt in variation.iterdescendants("{*}result")
+        for instElt in resultElt.iterdescendants("{*}instance")
+    }
+    if len(targets) == 0 or targets == {None}:
+        yield variation_id
+    else:
+        for target in targets:
+            if target is None:
+                target = '(default)'
+            yield f'{variation_id}{TARGET_SUFFIX_SEPARATOR}{target}'
 
 
 def _collect_test_case_paths(file_path: str, tree: etree._ElementTree, path_strs: list[str]) -> Generator[str, None, None]:
@@ -297,6 +326,16 @@ def get_conformance_suite_test_results(
 ) -> list[ParameterSet]:
     assert len(shards) == 0 or config.shards != 1, \
         'Conformance suite configuration must specify shards if --shard is passed'
+    if config.supports_test_engine:
+        if shards:
+            assert not testcase_filters, 'Testcase filters are not supported with shards.'
+            return get_test_engine_test_results_with_shards(
+                config=config, shards=shards, build_cache=build_cache, log_to_file=log_to_file, offline=offline, series=series
+            )
+        else:
+            return get_test_engine_test_results_without_shards(
+                config=config, build_cache=build_cache, log_to_file=log_to_file, offline=offline, series=series, testcase_filters=testcase_filters
+            )
     if shards:
         assert not testcase_filters, 'Testcase filters are not supported with shards.'
         return get_conformance_suite_test_results_with_shards(
@@ -306,6 +345,150 @@ def get_conformance_suite_test_results(
         return get_conformance_suite_test_results_without_shards(
             config=config, build_cache=build_cache, log_to_file=log_to_file, offline=offline, testcase_filters=testcase_filters
         )
+
+
+def _get_additional_constraints(config: ConformanceSuiteConfig) -> list[tuple[str, list[TestcaseConstraint]]]:
+    additional_constraints = []
+    for test_id, errors in config.expected_additional_testcase_errors.items():
+        additional_constraints.append(
+            (
+                test_id,
+                [
+                    TestcaseConstraint(
+                        qname=None,
+                        pattern=code,
+                        count=count,
+                    )
+                    for code, count in errors.items()
+                ],
+            )
+        )
+    return additional_constraints
+
+
+def get_test_engine_test_results_with_shards(
+        config: ConformanceSuiteConfig,
+        shards: list[int],
+        build_cache: bool = False,
+        log_to_file: bool = False,
+        offline: bool = False,
+        series: bool = False) -> list[ParameterSet]:
+    tasks = []
+    all_testcase_filters = []
+    for shard_id in shards:
+        test_shards = get_test_shards(config)
+        shard = test_shards[shard_id]
+        test_paths = shard.paths
+        additional_plugins = shard.plugins
+        all_test_paths = {path for test_shard in test_shards for path in test_shard.paths}
+
+        unrecognized_additional_error_ids = {
+            pattern
+            for pattern in {
+                _id.rsplit(':', 1)[0]
+                for _id in config.expected_additional_testcase_errors.keys()
+            }
+            if not any(fnmatch.fnmatch(test_path, pattern) for test_path in all_test_paths)
+        }
+        assert not unrecognized_additional_error_ids, f'Unrecognized expected additional error IDs: {unrecognized_additional_error_ids}'
+
+        unrecognized_expected_failure_ids = {_id.rsplit(':', 1)[0] for _id in config.expected_failure_ids} - all_test_paths
+        assert not unrecognized_expected_failure_ids, f'Unrecognized expected failure IDs: {unrecognized_expected_failure_ids}'
+        expected_failure_ids = set()
+        for expected_failure_id in config.expected_failure_ids:
+            test_path, test_id = expected_failure_id.rsplit(':', 1)
+            if test_id in test_paths.get(test_path, []):
+                expected_failure_ids.add(expected_failure_id)
+
+        testcase_filters = sorted([
+            f'*{os.path.sep}{path}:{vid}'
+            for path, vids in test_paths.items()
+            for vid in vids
+        ])
+        all_testcase_filters.extend(testcase_filters)
+
+        runtime_options = get_test_engine_runtime_options(
+            config=config, additional_plugins=additional_plugins,
+            build_cache=build_cache, offline=offline, shard=shard_id,
+        )
+        test_engine_options = TestEngineOptions(
+            additionalConstraints=_get_additional_constraints(config),
+            compareFormulaOutput=config.compare_formula_output,
+            customComparePatterns=config.custom_compare_patterns,
+            filters=testcase_filters,
+            ignoreLevels=config.ignore_levels,
+            indexFile=str(config.entry_point_path),
+            logDirectory=(Path('conf-logs') / config.name) if log_to_file else None,
+            matchAll=config.test_case_result_options == 'match-all',
+            name=config.name,
+            options=runtime_options,
+            parallel=not series, # "daemonic processes are not allowed to have children"
+        )
+        kws = dict(
+            expected_additional_testcase_errors=config.expected_additional_testcase_errors,
+            expected_failure_ids=expected_failure_ids,
+            required_locale_by_ids=config.required_locale_by_ids,
+            strict_testcase_index=config.strict_testcase_index,
+        )
+        tasks.append((test_engine_options, kws))
+    results = []
+    for task in tasks:
+        task_results = get_test_engine_mp_wrapper(task)
+        results.extend(task_results)
+    merged_results: dict[str, ParameterSet] = {}
+    for result in results:
+        result_id = str(result.id)
+        values = cast(dict[str, Any], result.values[0])
+        status = values.get('status')
+        existing_result = merged_results.get(result_id)
+        if existing_result is None:
+            merged_results[result_id] = result
+        elif status != 'skip':
+            existing_values = cast(dict[str, Any], existing_result.values[0])
+            existing_status = existing_values.get('status')
+            assert existing_status == 'skip', \
+                f'Conflicting results for {result_id}: {existing_status} vs {status}'
+            merged_results[result_id] = result
+    results = list(sorted(merged_results.values(), key=lambda x: str(x.id)))
+
+    assert sum(1 for r in results if cast(dict[str, Any], r.values[0]).get('status') != 'skip') == len(all_testcase_filters), \
+        f'Expected {len(all_testcase_filters)} results based on testcase filters, received {len(results)}'
+
+    return results
+
+
+def get_test_engine_test_results_without_shards(
+        config: ConformanceSuiteConfig,
+        build_cache: bool = False,
+        log_to_file: bool = False,
+        offline: bool = False,
+        series: bool = False,
+        testcase_filters: list[str] | None = None,
+) -> list[ParameterSet]:
+    additional_plugins = frozenset().union(*(plugins for _, plugins in config.additional_plugins_by_prefix))
+    runtime_options = get_test_engine_runtime_options(
+        config=config, additional_plugins=additional_plugins,
+        build_cache=build_cache, offline=offline, shard=None,
+    )
+    return get_test_engine_data(
+        test_engine_options=TestEngineOptions(
+            additionalConstraints=_get_additional_constraints(config),
+            compareFormulaOutput=config.compare_formula_output,
+            customComparePatterns=config.custom_compare_patterns,
+            filters=testcase_filters or [],
+            ignoreLevels=config.ignore_levels,
+            indexFile=str(config.entry_point_path),
+            logDirectory=(Path('conf-logs') / config.name) if log_to_file else None,
+            matchAll=config.test_case_result_options == 'match-all',
+            name=config.name,
+            options=runtime_options,
+            parallel=not series,
+        ),
+        expected_additional_testcase_errors=config.expected_additional_testcase_errors,
+        expected_failure_ids=config.expected_failure_ids,
+        required_locale_by_ids=config.required_locale_by_ids,
+        strict_testcase_index=config.strict_testcase_index,
+    )
 
 
 def get_conformance_suite_test_results_with_shards(
@@ -389,6 +572,48 @@ def get_conformance_suite_test_results_without_shards(
     return get_test_data(args, **kws)
 
 
+def get_test_engine_runtime_options(
+        config: ConformanceSuiteConfig,
+        additional_plugins: frozenset[str],
+        build_cache: bool,
+        offline: bool,
+        shard: int | None,
+) -> dict[str, Any]:
+    use_shards = shard is not None
+    optional_plugins = set()
+    if build_cache:
+        optional_plugins.add('CacheBuilder')
+    plugins = config.plugins | additional_plugins | optional_plugins
+    args: dict[str, Any] = {}
+    plugin_options = {}
+    if config.base_taxonomy_validation:
+        args['baseTaxonomyValidationMode'] = config.base_taxonomy_validation
+    if config.disclosure_system:
+        args['disclosureSystemName'] = config.disclosure_system
+    if config.package_paths:
+        args['packages'] = sorted(str(p) for p in config.package_paths)
+    if plugins:
+        args['plugins'] = '|'.join(sorted(plugins))
+    shard_str = f'-s{shard}' if use_shards else ''
+    if build_cache:
+        plugin_options['cacheBuilderPath'] = f'conf-{config.name}{shard_str}-cache.zip'
+    if config.capture_warnings:
+        args['testcaseResultsCaptureWarnings'] = True
+    if offline or config.runs_without_network:
+        args['internetConnectivity'] = 'offline'
+    args['pluginOptions'] = plugin_options
+    for k, v in config.runtime_options.items():
+        if k not in args:
+            args[k] = v
+        elif isinstance(v, dict):
+            args[k] |= v
+        elif isinstance(v, list):
+            args[k] += v
+        else:
+            args[k] = v
+    return args
+
+
 def load_timing_file(name: str) -> dict[str, float]:
     path = CONFORMANCE_SUITE_TIMING_RESOURCES_DIRECTORY / Path(name).with_suffix('.json')
     if not path.exists():
@@ -415,7 +640,7 @@ def save_actual_results_file(config: ConformanceSuiteConfig, results: list[Param
     rows = []
     for result in results:
         testcase_id = result.id
-        actual_codes = result.values[0].get('actual')  # type: ignore[union-attr]
+        actual_codes = cast(dict[str, list[str]], result.values[0]).get('actual') or []  # TODO: update for test engine
         for code in actual_codes:
             rows.append((testcase_id, code))
     output_filepath = Path(f'conf-{config.name}-actual.csv')

@@ -219,6 +219,7 @@ class ConformanceSuiteConfig:
     preprocessing_func: Callable[[ConformanceSuiteConfig], None] | None = None
     shards: int = 1
     strict_testcase_index: bool = True
+    supports_test_engine: bool = True
     runtime_options: dict[str, Any] = field(default_factory=dict)
     required_locale_by_ids: dict[str, re.Pattern[str]] = field(default_factory=dict)
     test_case_result_options: Literal['match-all', 'match-any'] = 'match-all'
@@ -247,6 +248,8 @@ class ConformanceSuiteConfig:
         overlapping_expected_failure_testcase_ids = self.expected_failure_ids.intersection(self.expected_additional_testcase_errors.keys())
         assert not overlapping_expected_failure_testcase_ids, \
             f'Testcase IDs in both expected failures and expected additional errors: {sorted(overlapping_expected_failure_testcase_ids)}'
+        assert 'plugins' not in self.runtime_options, \
+            '"plugins" must not be in runtime_options, use plugins field instead.'
         if self.shards > 1:
             ci_core_counts = set(OS_CORES.values())
             assert any(self.shards % core_count == 0 for core_count in ci_core_counts), \
