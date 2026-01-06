@@ -1,5 +1,6 @@
 from pathlib import PurePath, Path
 
+from arelle.testengine.ErrorLevel import ErrorLevel
 from tests.integration_tests.validation.assets import NL_PACKAGES
 from tests.integration_tests.validation.conformance_suite_config import ConformanceSuiteConfig, ConformanceSuiteAssetConfig, AssetSource
 
@@ -264,6 +265,11 @@ config = ConformanceSuiteConfig(
         'RTS_Art_6_a/index.xml:TC1_valid',  # Tested in NL-INLINE-2024
         'RTS_Art_6_a/index.xml:TC2_invalid',  # Tested in NL-INLINE-2024
     ]),
+    ignore_levels=frozenset({
+        ErrorLevel.NOT_SATISFIED,
+        ErrorLevel.OK,
+        ErrorLevel.WARNING,
+    }),
     info_url='https://www.sbr-nl.nl/sbr-domeinen/handelsregister/uitbreiding-elektronische-deponering-handelsregister',
     name=PurePath(__file__).stem,
     plugins=frozenset({'validate/NL'}),
