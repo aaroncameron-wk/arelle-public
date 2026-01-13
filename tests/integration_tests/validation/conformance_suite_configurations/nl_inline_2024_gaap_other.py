@@ -23,7 +23,7 @@ config = ConformanceSuiteConfig(
         (r"^.*$", r"^NL.NL-KVK.*\.~$"),
     ],
     disclosure_system='NL-INLINE-2024-GAAP-OTHER',
-    expected_additional_testcase_errors={f"*tests/{s}": val for s, val in {
+    expected_additional_testcase_errors={f"tests/{s}": val for s, val in {
         'G3-3-1_2/index.xml:TC3_invalid': {
             'requiredEntryPointOtherGaapNotReferenced': 1,
         },
@@ -48,13 +48,8 @@ config = ConformanceSuiteConfig(
             'noInlineXbrlTags': 1,
             'taggedTextFactOnlyInLanguagesOtherThanLanguageOfAReport': 5,
         },
-        'G5-1-3_2/index.xml:TC2_invalid': {
-            'documentNameDoesNotFollowNamingConvention': 1,
-            'noInlineXbrlTags': 1,
-            'requiredEntryPointOtherGaapNotReferenced': 1,
-        },
         'RTS_Annex_IV_Par_2_G3-1-1_1/index.xml:TC2_invalid': {
-            'message:valueKvKIdentifier': 13,
+            'valueKvKIdentifier': 13,
             'requiredEntryPointOtherGaapNotReferenced': 1,
         },
     }.items()},
@@ -62,6 +57,8 @@ config = ConformanceSuiteConfig(
         # Conformance Suite Errors
         'G3-4-1_2/index.xml:TC2_invalid',  # Expects fractionElementUsed”.  Note the double quote at the end.
 
+        ### Discovered during transition to Test Engine:
+        'G5-1-3_2/index.xml:TC2_invalid',  # Produces 'NL.NL-KVK.3.6.3.2', 'NL.NL-KVK.5.1.3.1' '"NL.NL-KVK.RTS_Art_6_a'
 
         # Wont Run
         'G3-1-2_1/index.xml:TC1_valid',  # Tested in NL-INLINE-2024
