@@ -1270,6 +1270,7 @@ class CntlrCmdLine(Cntlr.Cntlr):
                                     err,
                                     traceback.format_tb(sys.exc_info()[2])))
 
+
                         if options.testReport:
                             ViewFileTests.viewTests(self.modelManager.modelXbrl, options.testReport, options.testReportCols)
 
