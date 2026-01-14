@@ -20,6 +20,7 @@ from arelle.ModelValue import QName
 from arelle.RuntimeOptions import RuntimeOptions
 from arelle.UrlUtil import IXDS_DOC_SEPARATOR, IXDS_SURROGATE
 from arelle.api.Session import Session
+from test_engine import XmlTestcaseLoader
 from test_engine.ActualError import ActualError
 from test_engine.ErrorLevel import ErrorLevel
 from test_engine.TestEngineOptions import TestEngineOptions
@@ -125,165 +126,9 @@ def buildEntrypointUris(uris: list[Path]) -> list[str]:
 
 
 def loadTestcaseIndex(index_path: str, testEngineOptions: TestEngineOptions) -> list[TestcaseVariation]:
-    runtimeOptions = RuntimeOptions(
-        entrypointFile=index_path,
-        keepOpen=True,
-        # internetConnectivity='offline',
-        # internetRecheck='never',
-        # disablePersistentConfig=True,
-        # validate=True,
-    )
-    with Session() as session:
-        session.run(
-            runtimeOptions,
-            # logHandler=StructuredMessageLogHandler(), TODO
-        )
-        models = session.get_models()
-        logs = session.get_log_messages()
-        docs = []
-        testcaseVariations = []
-        for model in models:
-            for doc in model.urlDocs.values():
-                if hasattr(doc, 'testcaseVariations') and doc.testcaseVariations is not None:
-                    docs.append(doc)
-        for doc in docs:
-            docPath = Path(doc.uri)
-            docPath = docPath.relative_to(CWD) if docPath.is_relative_to(CWD) else docPath
-            for testcaseVariation in doc.testcaseVariations:
-                base = testcaseVariation.base
-                assert base is not None
-                if base.startswith("file:\\"):
-                    base = base[6:]
-
-                inlineTargets = [
-                    instElt.get("target")
-                    for resultElt in testcaseVariation.iterdescendants("{*}result")
-                    for instElt in resultElt.iterdescendants("{*}instance")
-                ] or [None]
-                for inlineTarget in inlineTargets:
-                    if len(inlineTargets) > 1 and inlineTarget is None:
-                        inlineTarget = "(default)"
-                    testcaseVariation.ixdsTarget = inlineTarget
-                    assert TARGET_SUFFIX_SEPARATOR not in testcaseVariation.id, \
-                        f"The '{TARGET_SUFFIX_SEPARATOR}' character is used internally as a separator " + \
-                        "and can not be included in a testcase variation ID."
-                    localId = f"{testcaseVariation.id}" + (f"{TARGET_SUFFIX_SEPARATOR}{inlineTarget}" if inlineTarget else "")
-                    fullId = f"{base}:{localId}"
-
-                    if testEngineOptions.filters:
-                        if not any(fnmatch.fnmatch(fullId, _filter) for _filter in testEngineOptions.filters):
-                            continue # TODO: Only filter here
-
-                    # TODO: Improve
-                    from arelle import XmlUtil
-                    calcMode = None
-                    resultElt = XmlUtil.descendant(testcaseVariation, None, "result")
-                    if isinstance(resultElt, ModelObject):
-                        calcMode = resultElt.attr('{https://xbrl.org/2023/conformance}mode')
-                    if calcMode == 'truncate':
-                        calcMode = 'truncation'
-
-                    constraints = []
-                    expected = testcaseVariation.expected or 'valid'
-                    if not isinstance(expected, list):
-                        expected = [expected]
-                    for e in expected:
-                        # TODO: table element
-                        # TODO: testcase element
-                        # TODO: testGroup element
-                        # TODO: result element
-                        # TODO: assert elements
-                        # TODO: assertionTests elements
-                        if e == 'valid':
-                            pass
-                        elif e == 'invalid':
-                            constraints.append(TestcaseConstraint(
-                                pattern='*',  # matches any code
-                            ))
-                        elif isinstance(e, QName):
-                            constraints.append(TestcaseConstraint(
-                                qname=e,
-                            ))
-                        elif isinstance(e, str):
-                            constraints.append(TestcaseConstraint(
-                                pattern=e,
-                            ))
-                        elif isinstance(e, dict):
-                            for pattern, assertions in e.items():
-                                satisfiedCount, notSatisfiedCount = assertions
-                                countMap = {
-                                    ErrorLevel.SATISIFED: satisfiedCount,
-                                    ErrorLevel.NOT_SATISFIED: notSatisfiedCount,
-                                }
-                                for level, count in countMap.items():
-                                    for i in range(0, count):
-                                        constraints.append(TestcaseConstraint(
-                                            pattern=pattern,
-                                            level=level,
-                                        ))
-                        else:
-                            raise ValueError(f"Unexpected expected error type: {type(e)}")
-
-                    if testcaseVariation.resultTableUri is not None:
-                        # Result table URIs are not currently validated
-                        pass
-
-                    expectedWarnings = testcaseVariation.expectedWarnings or []
-                    for warning in expectedWarnings:
-                        if isinstance(warning, QName):
-                            constraints.append(TestcaseConstraint(
-                                qname=warning,
-                                level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
-                            ))
-                        elif isinstance(warning, str):
-                            constraints.append(TestcaseConstraint(
-                                pattern=warning,
-                                level=ErrorLevel.ERROR,  # TODO: Differentiate between errors and warnings
-                            ))
-                        else:
-                            raise ValueError(f"Unexpected expected warning type: {type(e)}")
-
-                    blockedCodePattern = testcaseVariation.blockedMessageCodes # restricts codes examined when provided
-
-                    parameters = [
-                        f'{k.clarkNotation}={v[1]}'
-                        for k, v in testcaseVariation.parameters.items()
-                    ]
-                    if any(PARAMETER_SEPARATOR in parameter for parameter in parameters):
-                        raise ValueError('Parameter separator found in parameter key or value.')
-
-                    compareInstanceUri = None
-                    compareFormulaOutputUri = None
-                    instanceUri = testcaseVariation.resultXbrlInstanceUri
-                    if instanceUri:
-                        compareInstanceUri = Path(doc.modelXbrl.modelManager.cntlr.webCache.normalizeUrl(instanceUri, testcaseVariation.base))
-                        if testEngineOptions.compareFormulaOutput:
-                            compareFormulaOutputUri = compareInstanceUri
-                            compareInstanceUri = None
-
-                    testcaseConstraintSet = TestcaseConstraintSet(
-                        constraints=constraints,
-                        matchAll=testEngineOptions.matchAll,
-                    )
-                    testcaseVariations.append(TestcaseVariation(
-                        id=localId,
-                        fullId=fullId,
-                        name=testcaseVariation.name,
-                        description=testcaseVariation.description,
-                        base=base,
-                        readFirstUris=testcaseVariation.readMeFirstUris,
-                        shortName=f"{docPath}:{localId}",
-                        status=testcaseVariation.status,
-                        testcaseConstraintSet=testcaseConstraintSet,
-                        blockedCodePattern=blockedCodePattern,
-                        calcMode=calcMode,
-                        parameters=PARAMETER_SEPARATOR.join(parameters),
-                        ignoreLevels=testEngineOptions.ignoreLevels,
-                        compareInstanceUri=compareInstanceUri,
-                        compareFormulaOutputUri=compareFormulaOutputUri,
-                        inlineTarget=inlineTarget,
-                    ))
-        return testcaseVariations
+    if index_path.endswith('.xml'):
+        return XmlTestcaseLoader.loadTestcaseIndex(index_path, testEngineOptions)
+    raise ValueError(f'No testcase loader available for \"{index_path}\".')
 
 
 class TestEngine:
