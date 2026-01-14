@@ -1367,6 +1367,7 @@ class CntlrCmdLine(Cntlr.Cntlr):
                 for pluginXbrlMethod in PluginManager.pluginClassMethods("CntlrCmdLine.Filing.Validate"):
                     pluginXbrlMethod(self, options, filesource, _entrypointFiles, sourceZipStream=sourceZipStream, responseZipStream=responseZipStream)
             for pluginXbrlMethod in PluginManager.pluginClassMethods("CntlrCmdLine.Filing.End"):
+                
                 pluginXbrlMethod(self, options, filesource, _entrypointFiles, sourceZipStream=sourceZipStream, responseZipStream=responseZipStream)
         self.username = self.password = None #dereference password
         self._clearPluginData()
