@@ -463,6 +463,7 @@ def moduleModuleInfo(
         # If entry point is provided, use it to retrieve `moduleFilename`
         moduleFilename = moduleURL = entryPoint.load()()
     else:
+        assert moduleURL is not None
         # Otherwise, we will verify the path before continuing
         moduleFilename, entryPoint = getModuleFilename(moduleURL, reload=reload, normalize=True, base=_pluginBase)
 
