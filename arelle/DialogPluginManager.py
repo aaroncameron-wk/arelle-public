@@ -421,7 +421,7 @@ class DialogPluginManager(Toplevel):
         return choiceTuples
 
     def selectLocally(self):
-        entryPointRefs = EntryPointRef.discoverAll()
+        entryPointRefs = EntryPointRef.discoverAll(plugin_manager=self.cntlr.pluginManager)
         choiceTuples = self._generateChoiceTuples(entryPointRefs)
 
         selectedPath = DialogOpenArchive.selectPlugin(self, choiceTuples)

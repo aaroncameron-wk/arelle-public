@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import ast
 import gettext
-import warnings
 from glob import glob
 import importlib.util
 import json
@@ -789,10 +788,10 @@ class EntryPointRef:
     def createModuleInfo(self, plugin_manager: PluginManager | None = None) -> dict[TypeModuleInfoKey, Any] | None:
         """
         Creates a module information dictionary from the entry point ref.
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return: A module information dictionary
         """
-        pm = plugin_manager or _singleton
+        pm = plugin_manager
         assert pm is not None
         if self.entryPoint is not None:
             return pm.moduleModuleInfo(entryPoint=self.entryPoint)
@@ -804,7 +803,7 @@ class EntryPointRef:
         Given an entry point, retrieves the subset of information from __pluginInfo__ necessary to
         determine if the entry point should be imported as a plugin.
         :param entryPoint:
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return:
         """
         pluginUrlFunc = entryPoint.load()
@@ -818,10 +817,10 @@ class EntryPointRef:
         determine if the entry point should be imported as a plugin.
         :param filepath: Path to plugin, can be a directory or .py filepath
         :param entryPoint: Optional entry point information to include in aliases/moduleInfo
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return:
         """
-        pm = plugin_manager or _singleton
+        pm = plugin_manager
         assert pm is not None
         moduleFilename = pm._cntlr.webCache.getfilename(filepath)
         if moduleFilename:
@@ -849,10 +848,10 @@ class EntryPointRef:
     def discoverAll(plugin_manager: PluginManager | None = None) -> list[EntryPointRef]:
         """
         Retrieve all plugin entry points, cached on first run.
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return: List of all discovered entry points.
         """
-        pm = plugin_manager or _singleton
+        pm = plugin_manager
         assert pm is not None
         if pm._entryPointRefCache is None:
             pm._entryPointRefCache = EntryPointRef._discoverBuiltIn([], pm._pluginBase, plugin_manager=pm) + EntryPointRef._discoverInstalled(plugin_manager=pm)
@@ -864,7 +863,7 @@ class EntryPointRef:
         Recursively retrieve all plugin entry points in the given directory.
         :param entryPointRefs: Working list of entry point refs to append to.
         :param directory: Directory to search for entry points within.
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return: List of discovered entry points.
         """
         for fileName in sorted(os.listdir(directory)):
@@ -890,7 +889,7 @@ class EntryPointRef:
     def _discoverInstalled(plugin_manager: PluginManager | None = None) -> list[EntryPointRef]:
         """
         Retrieve all installed plugin entry points.
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return: List of all discovered entry points.
         """
         entryPoints = list(entry_points(group='arelle.plugin'))
@@ -908,7 +907,7 @@ class EntryPointRef:
         May return None of no matches are found.
         Throws an exception if multiple entry point refs match the search term.
         :param search: Only retrieve entry point matching the given search text.
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return: Matching entry point ref, if found.
         """
         entryPointRefs = EntryPointRef.search(search, plugin_manager=plugin_manager)
@@ -944,10 +943,10 @@ class EntryPointRef:
         Retrieve entry point module information matching provided search text.
         A map of aliases to matching entry points is cached on the first run.
         :param search: Only retrieve entry points matching the given search text.
-        :param plugin_manager: PluginManager instance. Defaults to module-level _singleton.
+        :param plugin_manager: PluginManager instance for cache/state access.
         :return: List of matching module infos.
         """
-        pm = plugin_manager or _singleton
+        pm = plugin_manager
         assert pm is not None
         if pm._entryPointRefAliasCache is None:
             entryPointRefAliasCache: dict[str, list[EntryPointRef]] = defaultdict(list)
@@ -958,165 +957,3 @@ class EntryPointRef:
             pm._entryPointRefAliasCache = entryPointRefAliasCache
         search = EntryPointRef._normalizePluginSearchTerm(search)
         return pm._entryPointRefAliasCache.get(search, [])
-
-
-# ---------------------------------------------------------------------------
-# Backward-compatible module-level API
-#
-# These wrappers delegate to a module-level PluginManager singleton so that
-# existing callers (e.g. ``from arelle.PluginManager import pluginClassMethods``)
-# continue to work without modification.
-# ---------------------------------------------------------------------------
-
-_singleton: PluginManager | None = None
-
-_SINGLETON_ATTRS = frozenset({
-    "pluginJsonFile", "pluginConfig", "pluginConfigChanged",
-    "pluginTraceFileLogger", "modulePluginInfos", "pluginMethodsForClasses",
-    "_cntlr", "_pluginBase",
-    "_entryPointRefCache", "_entryPointRefAliasCache",
-})
-
-
-def _deprecated(name: str) -> None:
-    warnings.warn(
-        f"arelle.PluginManager.{name} is deprecated. "
-        "Use cntlr.pluginManager instead.",
-        DeprecationWarning,
-        stacklevel=3,
-    )
-
-
-def __getattr__(name: str) -> Any:
-    if name in _SINGLETON_ATTRS and _singleton is not None:
-        _deprecated(name)
-        return getattr(_singleton, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-def init(cntlr: Cntlr, loadPluginConfig: bool = True) -> None:
-    _deprecated("init")
-    global _singleton
-    _singleton = PluginManager(cntlr, loadPluginConfig)
-
-
-def reset() -> None:
-    _deprecated("reset")
-    if _singleton is not None:
-        _singleton.reset()
-
-
-def orderedPluginConfig() -> dict[str, Any]:
-    _deprecated("orderedPluginConfig")
-    assert _singleton is not None
-    return _singleton.orderedPluginConfig()
-
-
-def save(cntlr: Cntlr) -> None:
-    _deprecated("save")
-    if _singleton is not None:
-        _singleton.save(cntlr)
-
-
-def close() -> None:
-    _deprecated("close")
-    if _singleton is not None:
-        _singleton.close()
-
-
-def logPluginTrace(message: str, level: int) -> None:
-    _deprecated("logPluginTrace")
-    if _singleton is not None:
-        _singleton.logPluginTrace(message, level)
-
-
-def modulesWithNewerFileDates() -> set[str]:
-    _deprecated("modulesWithNewerFileDates")
-    assert _singleton is not None
-    return _singleton.modulesWithNewerFileDates()
-
-
-def freshenModuleInfos() -> None:
-    _deprecated("freshenModuleInfos")
-    if _singleton is not None:
-        _singleton.freshenModuleInfos()
-
-
-def normalizeModuleFilename(moduleFilename: str) -> str | None:
-    _deprecated("normalizeModuleFilename")
-    return PluginManager.normalizeModuleFilename(moduleFilename)
-
-
-def getModuleFilename(moduleURL: str, reload: bool, normalize: bool, base: str | None) -> tuple[str | None, EntryPoint | None]:
-    _deprecated("getModuleFilename")
-    assert _singleton is not None
-    return _singleton.getModuleFilename(moduleURL, reload, normalize, base)
-
-
-def parsePluginInfo(moduleURL: str, moduleFilename: str, entryPoint: EntryPoint | None) -> dict[TypeModuleInfoKey, Any] | None:
-    _deprecated("parsePluginInfo")
-    assert _singleton is not None
-    return _singleton.parsePluginInfo(moduleURL, moduleFilename, entryPoint)
-
-
-def moduleModuleInfo(
-        moduleURL: str | None = None,
-        entryPoint: EntryPoint | None = None,
-        reload: bool = False,
-        parentImportsSubtree: bool = False) -> dict[TypeModuleInfoKey, Any] | None:
-    _deprecated("moduleModuleInfo")
-    assert _singleton is not None
-    return _singleton.moduleModuleInfo(moduleURL=moduleURL, entryPoint=entryPoint, reload=reload, parentImportsSubtree=parentImportsSubtree)
-
-
-def moduleInfo(pluginInfo: Any) -> None:
-    _deprecated("moduleInfo")
-    PluginManager.moduleInfo(pluginInfo)
-
-
-def pluginClassMethods(className: str) -> Iterator[Callable[..., Any]]:
-    _deprecated("pluginClassMethods")
-    if _singleton is not None:
-        yield from _singleton.pluginClassMethods(className)
-
-
-def hasPluginWithHook(name: str) -> bool:
-    _deprecated("hasPluginWithHook")
-    if _singleton is not None:
-        return _singleton.hasPluginWithHook(name)
-    return False
-
-
-def addPluginModule(name: str) -> dict[TypeModuleInfoKey, Any] | None:
-    _deprecated("addPluginModule")
-    assert _singleton is not None
-    return _singleton.addPluginModule(name)
-
-
-def reloadPluginModule(name: str) -> bool:
-    _deprecated("reloadPluginModule")
-    assert _singleton is not None
-    return _singleton.reloadPluginModule(name)
-
-
-def removePluginModule(name: str) -> bool:
-    _deprecated("removePluginModule")
-    assert _singleton is not None
-    return _singleton.removePluginModule(name)
-
-
-def addPluginModuleInfo(plugin_module_info: dict[TypeModuleInfoKey, Any] | None) -> dict[TypeModuleInfoKey, Any] | None:
-    _deprecated("addPluginModuleInfo")
-    assert _singleton is not None
-    return _singleton.addPluginModuleInfo(plugin_module_info)
-
-
-def loadModule(moduleInfo: dict[TypeModuleInfoKey, Any], packagePrefix: str = "") -> None:
-    _deprecated("loadModule")
-    assert _singleton is not None
-    _singleton.loadModule(moduleInfo, packagePrefix)
-
-
-def _get_name_dir_prefix(modulePath: Path, packagePrefix: str = "") -> tuple[str | None, str | None, str | None]:
-    _deprecated("_get_name_dir_prefix")
-    return PluginManager._get_name_dir_prefix(modulePath, packagePrefix)

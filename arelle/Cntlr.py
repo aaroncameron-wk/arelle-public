@@ -289,8 +289,7 @@ class Cntlr:
         self.webCache = WebCache(self, self.config.get("proxySettings"))
 
         # start plug in server (requres web cache initialized, but not logger)
-        PluginManager.init(self, loadPluginConfig=hasGui)
-        self.pluginManager = PluginManager._singleton  # type: ignore[assignment]
+        self.pluginManager = PluginManager.PluginManager(self, loadPluginConfig=hasGui)
 
         # requires plug ins initialized
         self.modelManager = ModelManager.initialize(self)
