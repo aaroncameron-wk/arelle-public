@@ -652,8 +652,9 @@ def loadModule(moduleInfo: dict[TypeModuleInfoKey, Any], packagePrefix: str="") 
                     _msg = _("Exception loading plug-in {name}: processing ModelObjectFactory.ElementSubstitutionClasses").format(
                             name=name, error=err)
                     logPluginTrace(_msg, logging.ERROR)
-            for importModuleInfo in moduleInfo.get('imports', EMPTYLIST):
-                loadModule(importModuleInfo, packageImportPrefix)
+            if packageImportPrefix is not None:
+                for importModuleInfo in moduleInfo.get('imports', EMPTYLIST):
+                    loadModule(importModuleInfo, packageImportPrefix)
         except (AttributeError, ImportError, FileNotFoundError, ModuleNotFoundError, TypeError, SystemError) as err:
             # Send a summary of the error to the logger and retain the stacktrace for stderr
             _cntlr.addToLog(message=_ERROR_MESSAGE_IMPORT_TEMPLATE.format(name), level=logging.ERROR)
