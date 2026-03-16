@@ -110,6 +110,7 @@ class Session:
         responseZipStream: BinaryIO | None = None,
         logHandler: logging.Handler | None = None,
         logFilters: list[logging.Filter] | None = None,
+        logFileName: str | None = None,
     ) -> bool:
         """
         Perform a run using the given options.
@@ -133,6 +134,7 @@ class Session:
             if self._cntlr is None:
                 # Certain options must be passed into the controller constructor to have the intended effect
                 self._cntlr = createCntlrAndPreloadPlugins(
+                    logFileName=logFileName,
                     uiLang=options.uiLang,
                     disablePersistentConfig=options.disablePersistentConfig,
                     arellePluginModules={},

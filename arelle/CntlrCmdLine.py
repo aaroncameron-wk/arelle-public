@@ -643,15 +643,16 @@ def parseArgs(args):
     return runtimeOptions, arellePluginModules
 
 
-def createCntlrAndPreloadPlugins(uiLang, disablePersistentConfig, arellePluginModules) -> CntlrCmdLine:
+def createCntlrAndPreloadPlugins(uiLang, disablePersistentConfig, arellePluginModules, logFileName=None) -> CntlrCmdLine:
     """
     This function creates a cntlr and preloads all the necessary plugins.
     :param uiLang: The UI Language
     :param disablePersistentConfig: flag to determine if persistent configs should be ignored
     :param arellePluginModules: a dictionary of commands and moduleInfos
+    :param logFileName: optional log file name to use for the cntlr's logging configuration
     :return: cntlr
     """
-    cntlr = CntlrCmdLine(uiLang=uiLang, disable_persistent_config=disablePersistentConfig)
+    cntlr = CntlrCmdLine(logFileName=logFileName, uiLang=uiLang, disable_persistent_config=disablePersistentConfig)
     if arellePluginModules:
         for cmd, moduleInfo in arellePluginModules.items():
             cntlr.preloadedPlugins[cmd] = moduleInfo
