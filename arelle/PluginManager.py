@@ -612,13 +612,15 @@ def loadModule(moduleInfo: dict[TypeModuleInfoKey, Any], packagePrefix: str="") 
         _cntlr.addToLog(message=_ERROR_MESSAGE_IMPORT_TEMPLATE.format(name), level=logging.ERROR)
     else:
         try:
+            if moduleDir is None or moduleName is None:
+                raise ModuleNotFoundError("Unable to load module")
             module = _find_and_load_module(moduleDir=moduleDir, moduleName=moduleName)
             pluginInfo = module.__pluginInfo__.copy()
             elementSubstitutionClasses = None
             if name == pluginInfo.get('name'):
                 pluginInfo["moduleURL"] = moduleURL
                 modulePluginInfos[name] = pluginInfo
-                if 'localeURL' in pluginInfo:
+                if 'localeURL' in pluginInfo and module.__file__ is not None:
                     # set L10N internationalization in loaded module
                     localeDir = os.path.dirname(module.__file__) + os.sep + pluginInfo['localeURL']
                     try:
