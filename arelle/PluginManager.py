@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ast
 import gettext
+import warnings
 from glob import glob
 import importlib.util
 import json
@@ -977,62 +978,83 @@ _SINGLETON_ATTRS = frozenset({
 })
 
 
+def _deprecated(name: str) -> None:
+    warnings.warn(
+        f"arelle.PluginManager.{name} is deprecated. "
+        "Use cntlr.pluginManager instead.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+
+
 def __getattr__(name: str) -> Any:
     if name in _SINGLETON_ATTRS and _singleton is not None:
+        _deprecated(name)
         return getattr(_singleton, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def init(cntlr: Cntlr, loadPluginConfig: bool = True) -> None:
+    _deprecated("init")
     global _singleton
     _singleton = PluginManager(cntlr, loadPluginConfig)
 
 
 def reset() -> None:
+    _deprecated("reset")
     if _singleton is not None:
         _singleton.reset()
 
 
 def orderedPluginConfig() -> dict[str, Any]:
+    _deprecated("orderedPluginConfig")
     assert _singleton is not None
     return _singleton.orderedPluginConfig()
 
 
 def save(cntlr: Cntlr) -> None:
+    _deprecated("save")
     if _singleton is not None:
         _singleton.save(cntlr)
 
 
 def close() -> None:
+    _deprecated("close")
     if _singleton is not None:
         _singleton.close()
 
 
 def logPluginTrace(message: str, level: int) -> None:
+    _deprecated("logPluginTrace")
     if _singleton is not None:
         _singleton.logPluginTrace(message, level)
 
 
 def modulesWithNewerFileDates() -> set[str]:
+    _deprecated("modulesWithNewerFileDates")
     assert _singleton is not None
     return _singleton.modulesWithNewerFileDates()
 
 
 def freshenModuleInfos() -> None:
+    _deprecated("freshenModuleInfos")
     if _singleton is not None:
         _singleton.freshenModuleInfos()
 
 
 def normalizeModuleFilename(moduleFilename: str) -> str | None:
+    _deprecated("normalizeModuleFilename")
     return PluginManager.normalizeModuleFilename(moduleFilename)
 
 
 def getModuleFilename(moduleURL: str, reload: bool, normalize: bool, base: str | None) -> tuple[str | None, EntryPoint | None]:
+    _deprecated("getModuleFilename")
     assert _singleton is not None
     return _singleton.getModuleFilename(moduleURL, reload, normalize, base)
 
 
 def parsePluginInfo(moduleURL: str, moduleFilename: str, entryPoint: EntryPoint | None) -> dict[TypeModuleInfoKey, Any] | None:
+    _deprecated("parsePluginInfo")
     assert _singleton is not None
     return _singleton.parsePluginInfo(moduleURL, moduleFilename, entryPoint)
 
@@ -1042,49 +1064,59 @@ def moduleModuleInfo(
         entryPoint: EntryPoint | None = None,
         reload: bool = False,
         parentImportsSubtree: bool = False) -> dict[TypeModuleInfoKey, Any] | None:
+    _deprecated("moduleModuleInfo")
     assert _singleton is not None
     return _singleton.moduleModuleInfo(moduleURL=moduleURL, entryPoint=entryPoint, reload=reload, parentImportsSubtree=parentImportsSubtree)
 
 
 def moduleInfo(pluginInfo: Any) -> None:
+    _deprecated("moduleInfo")
     PluginManager.moduleInfo(pluginInfo)
 
 
 def pluginClassMethods(className: str) -> Iterator[Callable[..., Any]]:
+    _deprecated("pluginClassMethods")
     if _singleton is not None:
         yield from _singleton.pluginClassMethods(className)
 
 
 def hasPluginWithHook(name: str) -> bool:
+    _deprecated("hasPluginWithHook")
     if _singleton is not None:
         return _singleton.hasPluginWithHook(name)
     return False
 
 
 def addPluginModule(name: str) -> dict[TypeModuleInfoKey, Any] | None:
+    _deprecated("addPluginModule")
     assert _singleton is not None
     return _singleton.addPluginModule(name)
 
 
 def reloadPluginModule(name: str) -> bool:
+    _deprecated("reloadPluginModule")
     assert _singleton is not None
     return _singleton.reloadPluginModule(name)
 
 
 def removePluginModule(name: str) -> bool:
+    _deprecated("removePluginModule")
     assert _singleton is not None
     return _singleton.removePluginModule(name)
 
 
 def addPluginModuleInfo(plugin_module_info: dict[TypeModuleInfoKey, Any] | None) -> dict[TypeModuleInfoKey, Any] | None:
+    _deprecated("addPluginModuleInfo")
     assert _singleton is not None
     return _singleton.addPluginModuleInfo(plugin_module_info)
 
 
 def loadModule(moduleInfo: dict[TypeModuleInfoKey, Any], packagePrefix: str = "") -> None:
+    _deprecated("loadModule")
     assert _singleton is not None
     _singleton.loadModule(moduleInfo, packagePrefix)
 
 
 def _get_name_dir_prefix(modulePath: Path, packagePrefix: str = "") -> tuple[str | None, str | None, str | None]:
+    _deprecated("_get_name_dir_prefix")
     return PluginManager._get_name_dir_prefix(modulePath, packagePrefix)
