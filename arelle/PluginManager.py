@@ -40,21 +40,6 @@ PLUGIN_TRACE_FILE: str | None = None
 # PLUGIN_TRACE_FILE = "c:/temp/pluginerr.txt"
 PLUGIN_TRACE_LEVEL = logging.WARNING
 
-# plugin control is static to correspond to statically loaded modules
-pluginJsonFile = None
-# The code in this module mostly assumes these values are not `NoneType` and
-# relies on try/except catching AttributeError, TypeError, etc. if they ever are.
-# Rather than add type casting or assertions throughout the code, we will ignore
-# the assignment type hint error here and rely on the initialization process to set
-# these values before use.
-pluginConfig: dict[str, Any] = None # type: ignore[assignment]
-_cntlr: Cntlr = None # type: ignore[assignment]
-
-pluginConfigChanged = False
-pluginTraceFileLogger = None
-modulePluginInfos: dict[str, Any] = {}
-pluginMethodsForClasses: dict[str, Any] = {}
-_pluginBase = None
 EMPTYLIST: list[Any] = []
 _ERROR_MESSAGE_IMPORT_TEMPLATE = "Unable to load module {}"
 
@@ -66,40 +51,43 @@ TypeModuleInfoKey = Union[
 class PluginManager:
 
     def __init__(self, cntlr: Cntlr, loadPluginConfig: bool = True) -> None:
-        global pluginJsonFile, pluginConfig, pluginTraceFileLogger, modulePluginInfos, pluginMethodsForClasses, pluginConfigChanged, _cntlr, _pluginBase
+        self.pluginJsonFile: str | None = None
+        self.pluginConfig: dict[str, Any] = None  # type: ignore[assignment]
+        self._cntlr: Cntlr = cntlr
+        self.pluginConfigChanged = False
+        self.pluginTraceFileLogger: logging.Logger | None = None
+        self.modulePluginInfos: dict[str, Any] = {}
+        self.pluginMethodsForClasses: dict[str, Any] = {}
+        self._pluginBase: str = cntlr.pluginDir + os.sep
+
         if PLUGIN_TRACE_FILE:
-            pluginTraceFileLogger = logging.getLogger(__name__)
-            pluginTraceFileLogger.propagate = False
+            self.pluginTraceFileLogger = logging.getLogger(__name__)
+            self.pluginTraceFileLogger.propagate = False
             handler = logging.FileHandler(PLUGIN_TRACE_FILE)
             formatter = logging.Formatter('%(asctime)s.%(msecs)03dz [%(levelname)s] %(message)s', datefmt='%Y-%m-%dT%H:%M:%S')
             handler.setFormatter(formatter)
             handler.setLevel(PLUGIN_TRACE_LEVEL)
-            pluginTraceFileLogger.addHandler(handler)
-        pluginConfigChanged = False
-        _cntlr = cntlr
-        _pluginBase = cntlr.pluginDir + os.sep
+            self.pluginTraceFileLogger.addHandler(handler)
         if loadPluginConfig:
             try:
-                pluginJsonFile = cntlr.userAppDir + os.sep + "plugins.json"
-                with open(pluginJsonFile, encoding='utf-8') as f:
-                    pluginConfig = json.load(f)
+                self.pluginJsonFile = cntlr.userAppDir + os.sep + "plugins.json"
+                with open(self.pluginJsonFile, encoding='utf-8') as f:
+                    self.pluginConfig = json.load(f)
                 self.freshenModuleInfos()
             except Exception:
                 pass # on GAE no userAppDir, will always come here
-        if not pluginConfig:
-            pluginConfig = {  # savable/reloadable plug in configuration
+        if not self.pluginConfig:
+            self.pluginConfig = {  # savable/reloadable plug in configuration
                 "modules": {}, # dict of moduleInfos by module name
                 "classes": {}  # dict by class name of list of class modules in execution order
             }
-            pluginConfigChanged = False # don't save until something is added to pluginConfig
-        modulePluginInfos = {}  # dict of loaded module pluginInfo objects by module names
-        pluginMethodsForClasses = {} # dict by class of list of ordered callable function objects
+            self.pluginConfigChanged = False # don't save until something is added to pluginConfig
 
     def reset(self) -> None:  # force reloading modules and plugin infos
-        if modulePluginInfos:
-            modulePluginInfos.clear()  # dict of loaded module pluginInfo objects by module names
-        if pluginMethodsForClasses:
-            pluginMethodsForClasses.clear() # dict by class of list of ordered callable function objects
+        if self.modulePluginInfos:
+            self.modulePluginInfos.clear()  # dict of loaded module pluginInfo objects by module names
+        if self.pluginMethodsForClasses:
+            self.pluginMethodsForClasses.clear() # dict by class of list of ordered callable function objects
 
     def orderedPluginConfig(self) -> dict[str, Any]:
         fieldOrder: list[TypeModuleInfoKey] = [
@@ -127,31 +115,30 @@ class PluginManager:
             return {k: moduleInfo[k] for k in orderedKeys}
 
         orderedModules = {
-            moduleName: sortModuleInfo(pluginConfig['modules'][moduleName])
-            for moduleName in sorted(pluginConfig['modules'].keys())
+            moduleName: sortModuleInfo(self.pluginConfig['modules'][moduleName])
+            for moduleName in sorted(self.pluginConfig['modules'].keys())
         }
 
         return {
             'modules': orderedModules,
-            'classes': dict(sorted(pluginConfig['classes'].items()))
+            'classes': dict(sorted(self.pluginConfig['classes'].items()))
         }
 
     def save(self, cntlr: Cntlr) -> None:
-        global pluginConfigChanged
-        if pluginConfigChanged and cntlr.hasFileSystem and not cntlr.disablePersistentConfig:
+        if self.pluginConfigChanged and cntlr.hasFileSystem and not cntlr.disablePersistentConfig:
             pluginJsonFile = cntlr.userAppDir + os.sep + "plugins.json"
             with open(pluginJsonFile, 'w', encoding='utf-8') as f:
                 jsonStr = str(json.dumps(self.orderedPluginConfig(), ensure_ascii=False, indent=2)) # might not be unicode in 2.7
                 f.write(jsonStr)
-            pluginConfigChanged = False
+            self.pluginConfigChanged = False
 
     def close(self) -> None:  # close all loaded methods
-        if pluginConfig is not None:
-            pluginConfig.clear()
-        if modulePluginInfos is not None:
-            modulePluginInfos.clear()
-        if pluginMethodsForClasses is not None:
-            pluginMethodsForClasses.clear()
+        if self.pluginConfig is not None:
+            self.pluginConfig.clear()
+        if self.modulePluginInfos is not None:
+            self.modulePluginInfos.clear()
+        if self.pluginMethodsForClasses is not None:
+            self.pluginMethodsForClasses.clear()
 
     ''' pluginInfo structure:
 
@@ -199,16 +186,16 @@ class PluginManager:
         :param message: Message to be logged
         :param level: Log level of message (e.g. logging.INFO)
         """
-        if pluginTraceFileLogger:
-            pluginTraceFileLogger.log(level, message)
+        if self.pluginTraceFileLogger:
+            self.pluginTraceFileLogger.log(level, message)
         if level >= logging.ERROR:
-            _cntlr.addToLog(message=message, level=level, messageCode='arelle:pluginLoadingError')
+            self._cntlr.addToLog(message=message, level=level, messageCode='arelle:pluginLoadingError')
 
 
     def modulesWithNewerFileDates(self) -> set[str]:
         names = set()
-        for moduleName, moduleInfo in pluginConfig["modules"].items():
-            freshenedFilename = _cntlr.webCache.getfilename(moduleInfo["moduleURL"], checkModifiedTime=True, normalize=True, base=_pluginBase)
+        for moduleName, moduleInfo in self.pluginConfig["modules"].items():
+            freshenedFilename = self._cntlr.webCache.getfilename(moduleInfo["moduleURL"], checkModifiedTime=True, normalize=True, base=self._pluginBase)
             if freshenedFilename is None:
                 _msg = _("Module URL could not be mapped to a filepath: {moduleURL}").format(moduleURL=moduleInfo["moduleURL"])
                 self.logPluginTrace(_msg, logging.ERROR)
@@ -235,9 +222,9 @@ class PluginManager:
     def freshenModuleInfos(self) -> None:
         # for modules with different date-times, re-load module info
         missingEnabledModules = []
-        for moduleName, moduleInfo in pluginConfig["modules"].items():
+        for moduleName, moduleInfo in self.pluginConfig["modules"].items():
             moduleEnabled = moduleInfo["status"] == "enabled"
-            freshenedFilename = _cntlr.webCache.getfilename(moduleInfo["moduleURL"], checkModifiedTime=True, normalize=True, base=_pluginBase)
+            freshenedFilename = self._cntlr.webCache.getfilename(moduleInfo["moduleURL"], checkModifiedTime=True, normalize=True, base=self._pluginBase)
             if freshenedFilename is None:
                 _msg = _("Module URL could not be mapped to a filepath: {moduleURL}").format(moduleURL=moduleInfo["moduleURL"])
                 self.logPluginTrace(_msg, logging.ERROR)
@@ -253,7 +240,7 @@ class PluginManager:
                         freshenedModuleInfo = self.moduleModuleInfo(moduleURL=moduleInfo["moduleURL"], reload=True)
                         if freshenedModuleInfo is not None:
                             if freshenedModuleInfo["name"] == moduleName:
-                                pluginConfig["modules"][moduleName] = freshenedModuleInfo
+                                self.pluginConfig["modules"][moduleName] = freshenedModuleInfo
                             else:
                                 # Module has been re-named
                                 if moduleEnabled:
@@ -273,12 +260,12 @@ class PluginManager:
             # Try re-adding plugin modules by name (for plugins that moved from built-in to pip installed)
             moduleInfo = self.addPluginModule(moduleName)
             if moduleInfo:
-                pluginConfig["modules"][moduleInfo["name"]] = moduleInfo
+                self.pluginConfig["modules"][moduleInfo["name"]] = moduleInfo
                 self.loadModule(moduleInfo)
                 self.logPluginTrace(_("Reloaded plugin that failed loading: {} {}").format(moduleName, moduleInfo), logging.INFO)
             else:
                 self.logPluginTrace(_("Removed plugin that failed loading (plugin may have been archived): {}").format(moduleName), logging.ERROR)
-        self.save(_cntlr)
+        self.save(self._cntlr)
 
 
     @staticmethod
@@ -312,7 +299,7 @@ class PluginManager:
 
     def getModuleFilename(self, moduleURL: str, reload: bool, normalize: bool, base: str | None) -> tuple[str | None, EntryPoint | None]:
         #TODO several directories, eg User Application Data
-        moduleFilename = _cntlr.webCache.getfilename(moduleURL, reload=reload, normalize=normalize, base=base)
+        moduleFilename = self._cntlr.webCache.getfilename(moduleURL, reload=reload, normalize=normalize, base=base)
         if moduleFilename:
             # `moduleURL` was mapped to a local filepath
             moduleFilename = self.normalizeModuleFilename(moduleFilename)
@@ -337,7 +324,7 @@ class PluginManager:
 
     def parsePluginInfo(self, moduleURL: str, moduleFilename: str, entryPoint: EntryPoint | None) -> dict[TypeModuleInfoKey, Any] | None:
         moduleDir, moduleName = os.path.split(moduleFilename)
-        with arelle.FileSource.openFileStream(_cntlr, moduleFilename) as f:
+        with arelle.FileSource.openFileStream(self._cntlr, moduleFilename) as f:
             contents = f.read()
             if '__pluginInfo__' not in contents:
                 return None
@@ -480,7 +467,7 @@ class PluginManager:
         else:
             assert moduleURL is not None
             # Otherwise, we will verify the path before continuing
-            moduleFilename, entryPoint = self.getModuleFilename(moduleURL, reload=reload, normalize=True, base=_pluginBase)
+            moduleFilename, entryPoint = self.getModuleFilename(moduleURL, reload=reload, normalize=True, base=self._pluginBase)
 
         if moduleFilename:
             try:
@@ -619,7 +606,7 @@ class PluginManager:
         moduleName, moduleDir, packageImportPrefix = self._get_name_dir_prefix(modulePath, packagePrefix)
 
         if all(p is None for p in [moduleName, moduleDir, packageImportPrefix]):
-            _cntlr.addToLog(message=_ERROR_MESSAGE_IMPORT_TEMPLATE.format(name), level=logging.ERROR)
+            self._cntlr.addToLog(message=_ERROR_MESSAGE_IMPORT_TEMPLATE.format(name), level=logging.ERROR)
         else:
             try:
                 if moduleDir is None or moduleName is None:
@@ -629,7 +616,7 @@ class PluginManager:
                 elementSubstitutionClasses = None
                 if name == pluginInfo.get('name'):
                     pluginInfo["moduleURL"] = moduleURL
-                    modulePluginInfos[name] = pluginInfo
+                    self.modulePluginInfos[name] = pluginInfo
                     if 'localeURL' in pluginInfo and module.__file__ is not None:
                         # set L10N internationalization in loaded module
                         localeDir = os.path.dirname(module.__file__) + os.sep + pluginInfo['localeURL']
@@ -644,16 +631,15 @@ class PluginManager:
                     for key, value in pluginInfo.items():
                         if key == 'name':
                             if name:
-                                pluginConfig['modules'][name] = moduleInfo
+                                self.pluginConfig['modules'][name] = moduleInfo
                         elif isinstance(value, types.FunctionType):
-                            classModuleNames = pluginConfig['classes'].setdefault(key, [])
+                            classModuleNames = self.pluginConfig['classes'].setdefault(key, [])
                             if name and name not in classModuleNames:
                                 classModuleNames.append(name)
                         if key == 'ModelObjectFactory.ElementSubstitutionClasses':
                             elementSubstitutionClasses = value
                     module._ = _gettext # type: ignore[attr-defined]
-                    global pluginConfigChanged
-                    pluginConfigChanged = True
+                    self.pluginConfigChanged = True
                 if elementSubstitutionClasses:
                     try:
                         from arelle.ModelObjectFactory import elementSubstitutionModelClass
@@ -667,7 +653,7 @@ class PluginManager:
                         self.loadModule(importModuleInfo, packageImportPrefix)
             except (AttributeError, ImportError, FileNotFoundError, ModuleNotFoundError, TypeError, SystemError) as err:
                 # Send a summary of the error to the logger and retain the stacktrace for stderr
-                _cntlr.addToLog(message=_ERROR_MESSAGE_IMPORT_TEMPLATE.format(name), level=logging.ERROR)
+                self._cntlr.addToLog(message=_ERROR_MESSAGE_IMPORT_TEMPLATE.format(name), level=logging.ERROR)
 
                 _msg = _("Exception loading plug-in {name}: {error}\n{traceback}").format(
                         name=name, error=err, traceback=traceback.format_exc())
@@ -679,26 +665,26 @@ class PluginManager:
 
 
     def pluginClassMethods(self, className: str) -> Iterator[Callable[..., Any]]:
-        if pluginConfig:
+        if self.pluginConfig:
             try:
-                pluginMethodsForClass = pluginMethodsForClasses[className]
+                pluginMethodsForClass = self.pluginMethodsForClasses[className]
             except KeyError:
                 # load all modules for class
                 pluginMethodsForClass = []
                 modulesNamesLoaded = set()
-                if className in pluginConfig["classes"]:
-                    for moduleName in pluginConfig["classes"].get(className):
-                        if moduleName and moduleName in pluginConfig["modules"] and moduleName not in modulesNamesLoaded:
+                if className in self.pluginConfig["classes"]:
+                    for moduleName in self.pluginConfig["classes"].get(className):
+                        if moduleName and moduleName in self.pluginConfig["modules"] and moduleName not in modulesNamesLoaded:
                             modulesNamesLoaded.add(moduleName) # prevent multiply executing same class
-                            moduleInfo = pluginConfig["modules"][moduleName]
+                            moduleInfo = self.pluginConfig["modules"][moduleName]
                             if moduleInfo["status"] == "enabled":
-                                if moduleName not in modulePluginInfos:
+                                if moduleName not in self.modulePluginInfos:
                                     self.loadModule(moduleInfo)
-                                if moduleName in modulePluginInfos:
-                                    pluginInfo = modulePluginInfos[moduleName]
+                                if moduleName in self.modulePluginInfos:
+                                    pluginInfo = self.modulePluginInfos[moduleName]
                                     if className in pluginInfo:
                                         pluginMethodsForClass.append(pluginInfo[className])
-                pluginMethodsForClasses[className] = pluginMethodsForClass
+                self.pluginMethodsForClasses[className] = pluginMethodsForClass
             yield from pluginMethodsForClass
 
 
@@ -718,8 +704,8 @@ class PluginManager:
 
 
     def reloadPluginModule(self, name: str) -> bool:
-        if name in pluginConfig["modules"]:
-            url = pluginConfig["modules"][name].get("moduleURL")
+        if name in self.pluginConfig["modules"]:
+            url = self.pluginConfig["modules"][name].get("moduleURL")
             if url:
                 moduleInfo = self.moduleModuleInfo(moduleURL=url, reload=True)
                 if moduleInfo:
@@ -728,23 +714,22 @@ class PluginManager:
         return False
 
     def removePluginModule(self, name: str) -> bool:
-        moduleInfo = pluginConfig["modules"].get(name)
+        moduleInfo = self.pluginConfig["modules"].get(name)
         if moduleInfo and name:
             def _removePluginModule(moduleInfo: dict[TypeModuleInfoKey, Any]) -> None:
                 _name = moduleInfo.get("name")
                 if _name:
                     for classMethod in moduleInfo["classMethods"]:
-                        classMethods = pluginConfig["classes"].get(classMethod)
+                        classMethods = self.pluginConfig["classes"].get(classMethod)
                         if classMethods and _name and _name in classMethods:
                             classMethods.remove(_name)
                             if not classMethods: # list has become unused
-                                del pluginConfig["classes"][classMethod] # remove class
+                                del self.pluginConfig["classes"][classMethod] # remove class
                     for importModuleInfo in moduleInfo.get('imports', EMPTYLIST):
                         _removePluginModule(importModuleInfo)
-                    pluginConfig["modules"].pop(_name, None)
+                    self.pluginConfig["modules"].pop(_name, None)
             _removePluginModule(moduleInfo)
-            global pluginConfigChanged
-            pluginConfigChanged = True
+            self.pluginConfigChanged = True
             return True
         return False # unable to remove
 
@@ -771,17 +756,16 @@ class PluginManager:
                 return
             # add classes
             for classMethod in subModuleInfo["classMethods"]:
-                classMethods = pluginConfig["classes"].setdefault(classMethod, [])
+                classMethods = self.pluginConfig["classes"].setdefault(classMethod, [])
                 _name = subModuleInfo["name"]
                 if _name and _name not in classMethods:
                     classMethods.append(_name)
             for importModuleInfo in subModuleInfo.get('imports', EMPTYLIST):
                 _addPluginSubModule(importModuleInfo)
-            pluginConfig["modules"][_name] = subModuleInfo
+            self.pluginConfig["modules"][_name] = subModuleInfo
 
         _addPluginSubModule(plugin_module_info)
-        global pluginConfigChanged
-        pluginConfigChanged = True
+        self.pluginConfigChanged = True
         return plugin_module_info
 
 
@@ -971,6 +955,18 @@ class EntryPointRef:
 # ---------------------------------------------------------------------------
 
 _singleton: PluginManager | None = None
+
+_SINGLETON_ATTRS = frozenset({
+    "pluginJsonFile", "pluginConfig", "pluginConfigChanged",
+    "pluginTraceFileLogger", "modulePluginInfos", "pluginMethodsForClasses",
+    "_cntlr", "_pluginBase",
+})
+
+
+def __getattr__(name: str) -> Any:
+    if name in _SINGLETON_ATTRS and _singleton is not None:
+        return getattr(_singleton, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def init(cntlr: Cntlr, loadPluginConfig: bool = True) -> None:
