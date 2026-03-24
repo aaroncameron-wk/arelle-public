@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import regex
 
-from arelle import Locale, ModelManager, PackageManager, PluginManager, XbrlConst
+from arelle import Locale, ModelManager, PackageManager, XbrlConst, PluginManager
 from arelle.BetaFeatures import BETA_FEATURES_AND_DESCRIPTIONS
 from arelle.ErrorManager import ErrorManager
 from arelle.FileSource import FileSource
@@ -32,6 +32,7 @@ from arelle.logging.handlers.LogToBufferHandler import LogToBufferHandler
 from arelle.logging.handlers.LogToPrintHandler import LogToPrintHandler
 from arelle.logging.handlers.LogToXmlHandler import LogToXmlHandler
 from arelle.logging.handlers.StructuredMessageLogHandler import StructuredMessageLogHandler
+from arelle.plugin_system._plugin_manager import PluginManager as PluginManagerType
 from arelle.SystemInfo import PlatformOS, getSystemWordSize, hasFileSystem, hasWebServer, isCGI, isGAE
 from arelle.typing import TypeGetText
 from arelle.utils.PluginData import PluginData
@@ -147,7 +148,7 @@ class Cntlr:
     config: dict[str, Any] | None
     configJsonFile: str
     webCache: WebCache
-    pluginManager: PluginManager.PluginManager
+    pluginManager: PluginManagerType
     modelManager: ModelManager.ModelManager
     logger: logging.Logger | None
     logHandler: logging.Handler
