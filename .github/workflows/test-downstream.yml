@@ -1,0 +1,64 @@
+name: Downstream Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      efrag_ref:
+        description: 'EFRAG-EU/Digital-Template-to-XBRL-Converter branch, tag or SHA to checkout (blank for default)'
+        required: false
+        type: string
+      python_version:
+        default: '3.14.4'
+        description: 'Python version to use'
+        required: true
+        type: string
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.py'
+      - '**.pyw'
+      - '.github/workflows/test-downstream.yml'
+      - 'arelle/**'
+      - 'requirements*.txt'
+
+permissions: {}
+
+jobs:
+  efrag:
+    name: EFRAG-EU
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout EFRAG
+        uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+          repository: EFRAG-EU/Digital-Template-to-XBRL-Converter
+          ref: ${{ inputs.efrag_ref }}
+      - name: Checkout Arelle
+        uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+          path: arelle
+      - name: Install Python 3
+        uses: actions/setup-python@v6.2.0
+        with:
+          check-latest: true
+          python-version: ${{ inputs.python_version || '3.14.4' }}
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml', '.github/workflows/**/*.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+          pip install -e ./arelle --no-deps
+      - name: Run Integration Tests
+        env:
+          # Force long-running tests
+          FORCE_RUN: true
+        run: pytest tests/integrationTests
