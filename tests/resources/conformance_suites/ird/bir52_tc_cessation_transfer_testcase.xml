@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_tc_cessation_transfer" description="BIR52 TC — Business Cessation (Transfer)">
+  <!--{
+  "id": "bir52_tc_cessation_transfer",
+  "group": "bir52_tc",
+  "title": "BIR52 TC — Business Cessation (Transfer)",
+  "description": "A valid BIR52 tax computation for a partnership/sole proprietorship that ceased business during the basis period via transfer to another person. Includes all BIR52-specific cessation elements: BusinessCessation = true, BusinessCessationTransferred = true, BusinessCessationTransferee details, and BusinessCessationTransfereeBusinessNature (BIR52-only element).",
+  "form_type": "BIR52",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir52_tc_cessation_transfer.html",
+    "tc_report": "deliverables/bir52_tc_cessation_transfer_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "BusinessCessation = true",
+    "BusinessCessationDate tagged",
+    "BusinessCessationDeathOfProprietor = false (must be present for BIR52 per NVAD-E-1040)",
+    "BusinessCessationTransferred = true",
+    "BusinessCessationTransferee details tagged",
+    "BusinessCessationTransfereeBusinessNature tagged (BIR52-specific, required by NVAD-E-1080)"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1020",
+    "NVAD-E-1030",
+    "NVAD-E-1040",
+    "NVAD-E-1060",
+    "NVAD-E-1070",
+    "NVAD-E-1080"
+  ],
+  "notes": "NVAD-E-1040 is BIR52-only: when BusinessCessation = true, BusinessCessationDeathOfProprietor must be tagged (even if false). NVAD-E-1080 is BIR52-only: BusinessCessationTransfereeBusinessNature required when transfer = true.",
+  "generation": {
+    "baseline": "bir52_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:BusinessCessation"
+    ],
+    "skip_remove_facts": [
+      "ird_tc:BusinessCessationDate",
+      "ird_tc:BusinessCessationDeathOfProprietor",
+      "ird_tc:BusinessCessationTransferred",
+      "ird_tc:BusinessCessationTransferee",
+      "ird_tc:BusinessCessationTransfereeBusinessNature"
+    ],
+    "add_set_facts": [
+      {
+        "name": "ird_tc:BusinessCessationDeathOfProprietor",
+        "format": "ixt:fixed-false",
+        "display": "No"
+      }
+    ]
+  }
+}-->
+  <variation id="bir52_tc_cessation_transfer" name="bir52_tc_cessation_transfer">
+    <description>A valid BIR52 tax computation for a partnership/sole proprietorship that ceased business during the basis period via transfer to another person. Includes all BIR52-specific cessation elements: BusinessCessation = true, BusinessCessationTransferred = true, BusinessCessationTransferee details, and BusinessCessationTransfereeBusinessNature (BIR52-only element).</description>
+    <data>
+      <instance readMeFirst="true">bir52_tc_cessation_transfer.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

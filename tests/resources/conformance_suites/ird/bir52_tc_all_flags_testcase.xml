@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_tc_all_flags" description="BIR52 TC — All Flags (Kitchen Sink)">
+  <!--{
+  "id": "bir52_tc_all_flags",
+  "group": "bir52_tc",
+  "title": "BIR52 TC — All Flags (Kitchen Sink)",
+  "description": "A valid BIR52 tax computation with nearly every optional boolean flag set to true, including two partners. BIR51-exclusive elements are not tagged. All mandatory TC items are present.",
+  "form_type": "BIR52",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "complete",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir52_tc_all_flags.html",
+    "tc_report": "deliverables/bir52_tc_all_flags_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "Two partners with typed dimension context (ird_tc:PartnersDimension)",
+    "Partner 1 (ABC) is precedent partner, individual HKID",
+    "Partner 2 (DEF) is non-precedent partner, individual HKID",
+    "50/50 profit sharing ratio, equal profit allocation",
+    "BusinessCessation = true with death-of-proprietor path",
+    "BIR52ProprietorPartnerEmoluments = true with adjustment",
+    "BIR52PurchaseCBAIBA = true"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1151",
+    "NVAD-E-1152",
+    "NVAD-E-1210",
+    "NVAD-E-1220",
+    "NVAD-E-1230",
+    "NVAD-E-1251",
+    "NVAD-E-1260",
+    "NVAD-E-1270",
+    "NVAD-E-1280"
+  ],
+  "notes": "Kitchen-sink structural reference. bir52_tc_baseline_partnership and bir52_tc_sole_proprietor remain the minimal valid starting points. Not paired with a companion FS: the cessation and other flags would not match the default FS baseline.",
+  "generation": {
+    "template": "deliverables/bir52_tc_all_flags.html",
+    "title": "BIR52 TC — All Flags (Kitchen Sink)"
+  }
+}-->
+  <variation id="bir52_tc_all_flags" name="bir52_tc_all_flags">
+    <description>A valid BIR52 tax computation with nearly every optional boolean flag set to true, including two partners. BIR51-exclusive elements are not tagged. All mandatory TC items are present.</description>
+    <data>
+      <instance readMeFirst="true">bir52_tc_all_flags.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

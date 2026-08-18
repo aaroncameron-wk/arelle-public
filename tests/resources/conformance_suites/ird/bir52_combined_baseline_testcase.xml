@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_combined_baseline" description="BIR52 Combined — Baseline Partnership (TC + FS)">
+  <!--{
+  "id": "bir52_combined_baseline",
+  "group": "combined",
+  "title": "BIR52 Combined — Baseline Partnership (TC + FS)",
+  "description": "A complete BIR52 filing comprising a paired tax computation data file and financial statements data file for a two-partner partnership. Revenue and ProfitLossBeforeTax are always mandatory in the FS file for BIR52. ProfitLossBeforeTax must match between TC and FS files (NVAD-E-1390).",
+  "form_type": "BIR52",
+  "scope": "tc_and_fs",
+  "fs_taxonomy": "ird_fs",
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir52_tc_baseline_partnership.html",
+    "tc_report": "deliverables/bir52_tc_baseline_partnership_report.json",
+    "fs": "deliverables/bir52_fs_hkfrs_baseline.html",
+    "fs_report": "deliverables/bir52_fs_hkfrs_baseline_report.json"
+  },
+  "key_features": [
+    "Revenue and ProfitLossBeforeTax always mandatory for BIR52 FS",
+    "TotalEquity not required in FS for BIR52",
+    "ProfitLossBeforeTax must match between TC and FS",
+    "FS monetary units match CurrencyUsed (HKD) in TC"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1291",
+    "NVAD-E-1292",
+    "NVAD-E-1300",
+    "NVAD-E-1390",
+    "NVAD-E-1430"
+  ],
+  "notes": null,
+  "generation": {
+    "baseline": "bir52_tc_from_all_flags"
+  }
+}-->
+  <variation id="bir52_combined_baseline" name="bir52_combined_baseline">
+    <description>A complete BIR52 filing comprising a paired tax computation data file and financial statements data file for a two-partner partnership. Revenue and ProfitLossBeforeTax are always mandatory in the FS file for BIR52. ProfitLossBeforeTax must match between TC and FS files (NVAD-E-1390).</description>
+    <data>
+      <instance readMeFirst="true">bir52_tc_baseline_partnership.html</instance>
+      <instance readMeFirst="true">bir52_fs_hkfrs_baseline.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

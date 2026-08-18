@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_fs_hkfrs_baseline" description="BIR51 FS — Full HKFRS, Non-Consolidated (Baseline)">
+  <!--{
+  "id": "bir51_fs_hkfrs_baseline",
+  "group": "bir51_fs",
+  "title": "BIR51 FS — Full HKFRS, Non-Consolidated (Baseline)",
+  "description": "A minimal valid financial statements iXBRL data file for a BIR51 (corporation) filing using the IRD FS Taxonomy (full HKFRSs). Covers the four minimum tagging requirements: P&L / statement of comprehensive income, statement of financial position, notes — related party transactions, notes — PPE. Mandatory FS items present: Revenue, ProfitLossBeforeTax, TotalEquity. Balance sheet balances: TotalAssets = TotalEquityAndLiabilities.",
+  "form_type": "BIR51",
+  "scope": "fs_only",
+  "fs_taxonomy": "ird_fs",
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": null,
+    "tc_report": null,
+    "fs": "deliverables/bir51_fs_hkfrs_baseline.html",
+    "fs_report": "deliverables/bir51_fs_hkfrs_baseline_report.json"
+  },
+  "key_features": [
+    "IRD FS Taxonomy entry point (ird_fs)",
+    "Revenue tagged and non-zero",
+    "ProfitLossBeforeTax tagged",
+    "TotalEquity tagged (mandatory for BIR51)",
+    "TotalAssets = TotalEquityAndLiabilities (balance sheet identity)",
+    "Statement of comprehensive income tagged",
+    "Statement of financial position tagged",
+    "Related party transactions note tagged",
+    "PPE note tagged"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1289",
+    "NVAD-E-1290",
+    "NVAD-E-1291",
+    "NVAD-E-1292",
+    "NVAD-E-1300"
+  ],
+  "notes": "This is a standalone FS file. Pair with bir51_tc_baseline in bir51_combined_baseline to exercise cross-file rules.",
+  "generation": {
+    "template": "templates/bir51_fs_hkfrs.html",
+    "title": "BIR51 FS — Full HKFRS, Non-Consolidated (Baseline)"
+  }
+}-->
+  <variation id="bir51_fs_hkfrs_baseline" name="bir51_fs_hkfrs_baseline">
+    <description>A minimal valid financial statements iXBRL data file for a BIR51 (corporation) filing using the IRD FS Taxonomy (full HKFRSs). Covers the four minimum tagging requirements: P&amp;L / statement of comprehensive income, statement of financial position, notes — related party transactions, notes — PPE. Mandatory FS items present: Revenue, ProfitLossBeforeTax, TotalEquity. Balance sheet balances: TotalAssets = TotalEquityAndLiabilities.</description>
+    <data>
+      <instance readMeFirst="true">bir51_fs_hkfrs_baseline.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_family_office" description="BIR51 TC — Family-Owned SPE / Single Family Office">
+  <!--{
+  "id": "bir51_tc_family_office",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Family-Owned SPE / Single Family Office",
+  "description": "A valid BIR51 tax computation for a family-owned special purpose entity (SPE) in which an eligible family-owned investment holding vehicle has beneficial interest, and where the entity is also an eligible single family office. FamilyOwnedSPE = true and the corresponding profits element is non-zero. EligibleSingleFamilyOfficeOfAFamily = true.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_family_office.html",
+    "tc_report": "deliverables/bir51_tc_family_office_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "FamilyOwnedSpecialPurposeEntityInWhichAnEligibleFamilyOwnedInvestmentHoldingVehicleHasBeneficialInterest = true",
+    "ProfitsEarnedByAFamilyOwnedSpecialPurposeEntityFromTransactionsSpecifiedInSection16_3OfSchedule16E non-zero",
+    "EligibleSingleFamilyOfficeOfAFamily = true"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1098"
+  ],
+  "notes": "NVAD-E-1098: when FamilyOwnedSPE = false, the profits element must be 0. This scenario tests the true/non-zero positive case.",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:FamilyOwnedSpecialPurposeEntityInWhichAnEligibleFamilyOwnedInvestmentHoldingVehicleHasBeneficialInterest",
+      "ird_tc:EligibleSingleFamilyOfficeOfAFamily"
+    ],
+    "add_set_facts": [
+      {
+        "name": "ird_tc:FamilyOwnedSpecialPurposeEntityInWhichAnEligibleFamilyOwnedInvestmentHoldingVehicleHasBeneficialInterest",
+        "format": "ixt:fixed-true",
+        "display": "Yes"
+      },
+      {
+        "name": "ird_tc:ProfitsEarnedByAFamilyOwnedSpecialPurposeEntityFromTransactionsSpecified",
+        "value": "1000"
+      }
+    ]
+  }
+}-->
+  <variation id="bir51_tc_family_office" name="bir51_tc_family_office">
+    <description>A valid BIR51 tax computation for a family-owned special purpose entity (SPE) in which an eligible family-owned investment holding vehicle has beneficial interest, and where the entity is also an eligible single family office. FamilyOwnedSPE = true and the corresponding profits element is non-zero. EligibleSingleFamilyOfficeOfAFamily = true.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_family_office.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

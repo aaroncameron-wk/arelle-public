@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_insurance_rbc" description="BIR51 TC — Insurance Corporation, RBC Regime">
+  <!--{
+  "id": "bir51_tc_insurance_rbc",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Insurance Corporation, RBC Regime",
+  "description": "A valid BIR51 tax computation for an insurance corporation commencing implementation of the risk-based capital (RBC) regime. InsuranceCorporationCommencing...RBC = true, with exactly one of the two one-off RBC adjustment amounts non-zero (the other must be zero — NVAD-E-1095), and ElectToTreat...By5EqualAmounts tagged.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_insurance_rbc.html",
+    "tc_report": "deliverables/bir51_tc_insurance_rbc_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "InsuranceCorporationCommencingToImplementRiskBasedCapitalRegimeToDetermineCapitalRequirements = true",
+    "IncomeAmountOfOneOffAdjustmentArisingFromImplementationOfRBCRegime non-zero",
+    "LossAmountOfOneOffAdjustmentArisingFromImplementationOfRBCRegime = 0 (must not both be non-zero)",
+    "ElectToTreatOneOffAdjustmentAsYourIncomeOrLossBy5EqualAmounts tagged"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1093",
+    "NVAD-E-1094",
+    "NVAD-E-1095",
+    "NVAD-E-1096"
+  ],
+  "notes": "Two sub-variants are possible: income adjustment and loss adjustment. NVAD-E-1095 prohibits both being non-zero simultaneously.",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:InsuranceCorporationCommencingToImplementRiskBasedCapitalRegimeToDetermineCapitalRequirements"
+    ],
+    "skip_remove_facts": [
+      "ird_tc:IncomeAmountOfOneOffAdjustmentArisingFromImplementationOfRBCRegime",
+      "ird_tc:LossAmountOfOneOffAdjustmentArisingFromImplementationOfRBCRegime",
+      "ird_tc:ElectToTreatOneOffAdjustmentAsYourIncomeOrLossBy5EqualAmounts"
+    ]
+  }
+}-->
+  <variation id="bir51_tc_insurance_rbc" name="bir51_tc_insurance_rbc">
+    <description>A valid BIR51 tax computation for an insurance corporation commencing implementation of the risk-based capital (RBC) regime. InsuranceCorporationCommencing...RBC = true, with exactly one of the two one-off RBC adjustment amounts non-zero (the other must be zero — NVAD-E-1095), and ElectToTreat...By5EqualAmounts tagged.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_insurance_rbc.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_combined_foreign_currency" description="BIR51 Combined — Foreign Functional Currency (TC + FS)">
+  <!--{
+  "id": "bir51_combined_foreign_currency",
+  "group": "combined",
+  "title": "BIR51 Combined — Foreign Functional Currency (TC + FS)",
+  "description": "A complete BIR51 filing where the entity's functional currency is not HKD. Both the TC and FS files use USD (or another valid ISO 4217 code) for monetary facts. NVAD-E-1430 requires FS monetary facts to use the same functional currency declared in the TC file. NVAD-E-1390 requires ProfitLossBeforeTax to match in both files (in the functional currency).",
+  "form_type": "BIR51",
+  "scope": "tc_and_fs",
+  "fs_taxonomy": "ird_fs",
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_foreign_currency.html",
+    "tc_report": "deliverables/bir51_tc_foreign_currency_report.json",
+    "fs": "deliverables/bir51_fs_foreign_currency.html",
+    "fs_report": "deliverables/bir51_fs_foreign_currency_report.json"
+  },
+  "key_features": [
+    "CurrencyUsed = USD in TC",
+    "All TC monetary facts use USD unit (except AssessableProfitsAdjustedLossInHongKongDollar which uses HKD)",
+    "All FS monetary facts use USD unit (must match TC CurrencyUsed)",
+    "ProfitLossBeforeTax identical in both files (in USD)"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-0240",
+    "NVAD-E-0260",
+    "NVAD-E-1370",
+    "NVAD-E-1390",
+    "NVAD-E-1430"
+  ],
+  "notes": "Pair bir51_tc_foreign_currency.html with bir51_fs_foreign_currency.html. Generate both standalone scenarios before running the combined testcase.",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "add_set_facts": [
+      {
+        "name": "ird_tc:CurrencyUsed",
+        "display": "USD"
+      },
+      {
+        "name": "ird_tc:ConversionRate",
+        "value": "7.78"
+      },
+      {
+        "name": "ird_tc:GrossIncome",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:IntellectualPropertyPayments",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:ProfitsEarnedByAFamilyOwnedSpecialPurposeEntityFromTransactionsSpecified",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:TransactionWithNonResidentHireCharges",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:TransactionWithNonResidentProfessionalServicesFee",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:DeductionClaimedInterestNonHongKongAssociatedCorporationsIntraGroupFinancingBusiness",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:DeductionClaimedForLeasedPremisesReinstatementCosts",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:ForeignTaxPaidClaimedAsAUnilateralTaxCredit",
+        "unit": "unit_USD"
+      }
+    ],
+    "add_facts": [
+      {
+        "after": "ird_tc:GrossIncome",
+        "name": "ird_tc:ProfitLossBeforeTax",
+        "label": "Profit (loss) before tax",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_USD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "0"
+      }
+    ]
+  }
+}-->
+  <variation id="bir51_combined_foreign_currency" name="bir51_combined_foreign_currency">
+    <description>A complete BIR51 filing where the entity's functional currency is not HKD. Both the TC and FS files use USD (or another valid ISO 4217 code) for monetary facts. NVAD-E-1430 requires FS monetary facts to use the same functional currency declared in the TC file. NVAD-E-1390 requires ProfitLossBeforeTax to match in both files (in the functional currency).</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_foreign_currency.html</instance>
+      <instance readMeFirst="true">bir51_fs_foreign_currency.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

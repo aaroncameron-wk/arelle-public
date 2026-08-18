@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_tc_personal_assessment" description="BIR52 TC — Partner Electing Personal Assessment">
+  <!--{
+  "id": "bir52_tc_personal_assessment",
+  "group": "bir52_tc",
+  "title": "BIR52 TC — Partner Electing Personal Assessment",
+  "description": "A valid BIR52 tax computation (two-partner partnership) where one individual partner elects personal assessment. BIR52ProprietorPartnerPersonalAssessment = true for an individual partner (identified by HKID). The second partner does not elect personal assessment.",
+  "form_type": "BIR52",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir52_tc_personal_assessment.html",
+    "tc_report": "deliverables/bir52_tc_personal_assessment_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "Partner 1: BIR52ProprietorPartnerPersonalAssessment = true, HKID format identifier",
+    "Partner 2: BIR52ProprietorPartnerPersonalAssessment = false",
+    "Both partners are individuals (HKID format) — personal assessment is only permitted for individuals"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1250"
+  ],
+  "notes": "NVAD-E-1250: personal assessment must not be true for a non-individual partner (BRN format). This scenario demonstrates the valid positive case with an individual HKID partner.",
+  "generation": {
+    "baseline": "bir52_tc_from_all_flags",
+    "add_set_facts": [
+      {
+        "name": "ird_tc:BIR52ProprietorPartnerPersonalAssessment",
+        "context": "_ctx_p1",
+        "format": "ixt:fixed-true",
+        "display": "Yes"
+      }
+    ]
+  }
+}-->
+  <variation id="bir52_tc_personal_assessment" name="bir52_tc_personal_assessment">
+    <description>A valid BIR52 tax computation (two-partner partnership) where one individual partner elects personal assessment. BIR52ProprietorPartnerPersonalAssessment = true for an individual partner (identified by HKID). The second partner does not elect personal assessment.</description>
+    <data>
+      <instance readMeFirst="true">bir52_tc_personal_assessment.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_offshore_claim" description="BIR51 TC — Offshore Profits Claim">
+  <!--{
+  "id": "bir51_tc_offshore_claim",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Offshore Profits Claim",
+  "description": "A valid BIR51 tax computation where offshore profits are excluded from assessable profits. OffshoreProfitsExcluded is non-zero and the paired ReasonsForTheOffshoreClaim text element is tagged.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_offshore_claim.html",
+    "tc_report": "deliverables/bir51_tc_offshore_claim_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "OffshoreProfitsExcluded non-zero",
+    "ReasonsForTheOffshoreClaim tagged with descriptive text",
+    "OffshoreProfitsFromBusinessAttributableToTheUseOfTheInternet tagged",
+    "OffshoreProfitsFromBusinessAttributableToContractProcessing tagged"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-0310",
+    "NVAD-E-1110"
+  ],
+  "notes": null,
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "add_facts": [
+      {
+        "after": "ird_tc:GrossIncome",
+        "name": "ird_tc:OffshoreProfitsExcluded",
+        "label": "Offshore profits excluded",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:OffshoreProfitsExcluded",
+        "name": "ird_tc:ReasonsForTheOffshoreClaim",
+        "label": "Reasons for the offshore claim",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Offshore business activities conducted outside Hong Kong"
+      }
+    ]
+  }
+}-->
+  <variation id="bir51_tc_offshore_claim" name="bir51_tc_offshore_claim">
+    <description>A valid BIR51 tax computation where offshore profits are excluded from assessable profits. OffshoreProfitsExcluded is non-zero and the paired ReasonsForTheOffshoreClaim text element is tagged.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_offshore_claim.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

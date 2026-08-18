@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_business_cessation" description="BIR51 TC — Business Cessation">
+  <!--{
+  "id": "bir51_tc_business_cessation",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Business Cessation",
+  "description": "A valid BIR51 tax computation for a corporation that ceased business during the basis period. All BIR51-specific cessation elements are present: BusinessCessation = true with cessation date, BusinessCessationTransferred and transferee details, and AssetsOfBusinessTransferredToAssociatedPerson.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_business_cessation.html",
+    "tc_report": "deliverables/bir51_tc_business_cessation_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "BusinessCessation = true",
+    "BusinessCessationDate tagged",
+    "BusinessCessationTransferred = true",
+    "BusinessCessationTransferee details tagged",
+    "AssetsOfBusinessTransferredToAssociatedPerson tagged (BIR51-specific, required when cessation = true)"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1020",
+    "NVAD-E-1030",
+    "NVAD-E-1060",
+    "NVAD-E-1070",
+    "NVAD-E-1081"
+  ],
+  "notes": "NVAD-E-1081 is BIR51-only: AssetsOfBusinessTransferredToAssociatedPerson must be tagged whenever BusinessCessation = true in a BIR51 filing.",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:BusinessCessation"
+    ],
+    "skip_remove_facts": [
+      "ird_tc:BusinessCessationDate",
+      "ird_tc:BusinessCessationTransferred",
+      "ird_tc:BusinessCessationTransferee",
+      "ird_tc:BusinessCessationTransferredAssetsAssociated"
+    ]
+  }
+}-->
+  <variation id="bir51_tc_business_cessation" name="bir51_tc_business_cessation">
+    <description>A valid BIR51 tax computation for a corporation that ceased business during the basis period. All BIR51-specific cessation elements are present: BusinessCessation = true with cessation date, BusinessCessationTransferred and transferee details, and AssetsOfBusinessTransferredToAssociatedPerson.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_business_cessation.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

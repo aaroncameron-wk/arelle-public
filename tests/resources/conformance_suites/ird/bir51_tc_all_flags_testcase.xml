@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_all_flags" description="BIR51 TC — All Flags (Kitchen Sink)">
+  <!--{
+  "id": "bir51_tc_all_flags",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — All Flags (Kitchen Sink)",
+  "description": "A valid BIR51 tax computation with virtually every optional boolean flag set to true. Useful as a structural reference showing all possible elements. All mandatory TC items are tagged. NVAD-E-1290 does not apply to this TC-only filing.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "complete",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_all_flags.html",
+    "tc_report": "deliverables/bir51_tc_all_flags_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "AccountingDateDifferentFromThatOfLastYear = true with ReasonsForTheChangeOfAccountingDate",
+    "BusinessCommencement = true with BusinessCommencementDate",
+    "BusinessCessation = true with cessation date, transfer details, and AssetsOfBusinessTransferredToAssociatedPerson",
+    "PrivateCompany = true with ShareholderChange",
+    "Amalgamation = true",
+    "AccountsPreparedAtConsolidatedLevel = true",
+    "InsuranceCorporationCommencingToImplementRiskBasedCapitalRegimeToDetermineCapitalRequirements = true with RBC adjustments",
+    "FamilyOwnedSpecialPurposeEntity = true with profits element",
+    "EligibleSingleFamilyOfficeOfAFamily = true",
+    "AdvanceRuling = true with AdvanceRulingDetails",
+    "PermanentEstablishment = true with TransactionsWithOtherParts",
+    "TaxReliefDTA = true",
+    "AuditRequirement = true with HongKongPracticeUnit and PractisingCertificateNumber"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-0130",
+    "NVAD-E-0140",
+    "NVAD-E-0940",
+    "NVAD-E-0950",
+    "NVAD-E-0960",
+    "NVAD-E-0970",
+    "NVAD-E-0981",
+    "NVAD-E-0982",
+    "NVAD-E-1000",
+    "NVAD-E-1010",
+    "NVAD-E-1020",
+    "NVAD-E-1030",
+    "NVAD-E-1060",
+    "NVAD-E-1070",
+    "NVAD-E-1081",
+    "NVAD-E-1090",
+    "NVAD-E-1093",
+    "NVAD-E-1094",
+    "NVAD-E-1095",
+    "NVAD-E-1096",
+    "NVAD-E-1098"
+  ],
+  "notes": "Kitchen-sink structural reference. bir51_tc_baseline remains the minimal valid starting point for derived scenarios. Not paired with a companion FS: the consolidated-accounts and other flags would not match the default FS baseline.",
+  "generation": {
+    "template": "deliverables/bir51_tc_all_flags.html",
+    "title": "BIR51 TC — All Flags (Kitchen Sink)"
+  }
+}-->
+  <variation id="bir51_tc_all_flags" name="bir51_tc_all_flags">
+    <description>A valid BIR51 tax computation with virtually every optional boolean flag set to true. Useful as a structural reference showing all possible elements. All mandatory TC items are tagged. NVAD-E-1290 does not apply to this TC-only filing.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_all_flags.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

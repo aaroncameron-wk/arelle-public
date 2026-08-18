@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_tc_business_commencement" description="BIR52 TC — Business Commencement">
+  <!--{
+  "id": "bir52_tc_business_commencement",
+  "group": "bir52_tc",
+  "title": "BIR52 TC — Business Commencement",
+  "description": "A valid BIR52 tax computation for a partnership/sole proprietorship that commenced business during the basis period.",
+  "form_type": "BIR52",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir52_tc_business_commencement.html",
+    "tc_report": "deliverables/bir52_tc_business_commencement_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "BusinessCommencement = true",
+    "BusinessCommencementDate tagged",
+    "Shorter basis period"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1000",
+    "NVAD-E-1010"
+  ],
+  "notes": null,
+  "generation": {
+    "baseline": "bir52_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:BusinessCommencement"
+    ],
+    "skip_remove_facts": [
+      "ird_tc:BusinessCommencementDate"
+    ]
+  }
+}-->
+  <variation id="bir52_tc_business_commencement" name="bir52_tc_business_commencement">
+    <description>A valid BIR52 tax computation for a partnership/sole proprietorship that commenced business during the basis period.</description>
+    <data>
+      <instance readMeFirst="true">bir52_tc_business_commencement.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

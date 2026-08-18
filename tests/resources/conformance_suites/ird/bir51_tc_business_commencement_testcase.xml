@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_business_commencement" description="BIR51 TC — Business Commencement">
+  <!--{
+  "id": "bir51_tc_business_commencement",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Business Commencement",
+  "description": "A valid BIR51 tax computation for a corporation that commenced business during the basis period. BusinessCommencement is true and BusinessCommencementDate is tagged. The basis period is shorter than 12 months (starting from the commencement date).",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_business_commencement.html",
+    "tc_report": "deliverables/bir51_tc_business_commencement_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "BusinessCommencement = true",
+    "BusinessCommencementDate tagged (e.g. 01/10/2025, mid-year start)",
+    "BasisPeriodStartDate matches BusinessCommencementDate",
+    "BasisPeriodEndDate = 31/03/2026 (end of assessment year)"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1000",
+    "NVAD-E-1010"
+  ],
+  "notes": null,
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:BusinessCommencement"
+    ],
+    "skip_remove_facts": [
+      "ird_tc:BusinessCommencementDate"
+    ]
+  }
+}-->
+  <variation id="bir51_tc_business_commencement" name="bir51_tc_business_commencement">
+    <description>A valid BIR51 tax computation for a corporation that commenced business during the basis period. BusinessCommencement is true and BusinessCommencementDate is tagged. The basis period is shorter than 12 months (starting from the commencement date).</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_business_commencement.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

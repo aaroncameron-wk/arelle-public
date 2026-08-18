@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_fs_foreign_currency" description="BIR51 FS — Full HKFRS, Foreign Functional Currency (USD)">
+  <!--{
+  "id": "bir51_fs_foreign_currency",
+  "group": "bir51_fs",
+  "title": "BIR51 FS — Full HKFRS, Foreign Functional Currency (USD)",
+  "description": "A valid financial statements iXBRL data file for a BIR51 (corporation) filing where the entity's functional currency is USD. All monetary facts use a USD-denominated unit, consistent with CurrencyUsed in the paired TC file (NVAD-E-1430). ProfitLossBeforeTax = 0 in USD, matching the paired bir51_tc_foreign_currency.html file (NVAD-E-1390).",
+  "form_type": "BIR51",
+  "scope": "fs_only",
+  "fs_taxonomy": "ird_fs",
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": null,
+    "tc_report": null,
+    "fs": "deliverables/bir51_fs_foreign_currency.html",
+    "fs_report": "deliverables/bir51_fs_foreign_currency_report.json"
+  },
+  "key_features": [
+    "IRD FS Taxonomy entry point (ird_fs)",
+    "All monetary facts use unit_USD (functional currency)",
+    "Revenue = 100 USD, CostOfSales = 100 USD, ProfitLossBeforeTax = 0 USD",
+    "TotalEquity tagged (mandatory for BIR51)",
+    "TotalAssets = TotalEquityAndLiabilities (balance sheet identity)",
+    "Pairs with bir51_tc_foreign_currency for cross-file rules NVAD-E-1390 and NVAD-E-1430"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1290",
+    "NVAD-E-1291",
+    "NVAD-E-1292",
+    "NVAD-E-1300",
+    "NVAD-E-1390",
+    "NVAD-E-1430"
+  ],
+  "notes": "Pair with bir51_tc_foreign_currency in bir51_combined_foreign_currency.",
+  "generation": {
+    "template": "templates/bir51_fs_hkfrs.html",
+    "title": "BIR51 FS — Full HKFRS, Foreign Functional Currency (USD)",
+    "add_set_facts": [
+      {
+        "name": "ird_fs:PropertyPlantAndEquipment",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:NoncurrentAssets",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:TradeAndOtherCurrentReceivables",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:CashAndCashEquivalents",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:CurrentAssets",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:Assets",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:IssuedCapital",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:RetainedEarnings",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:Equity",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:TradeAndOtherCurrentPayables",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:CurrentLiabilities",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:Liabilities",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:EquityAndLiabilities",
+        "context": "_ctx1",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:Revenue",
+        "context": "_ctx2",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:CostOfSales",
+        "context": "_ctx2",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:GrossProfit",
+        "context": "_ctx2",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:ProfitLossBeforeTax",
+        "context": "_ctx2",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:PropertyPlantAndEquipment",
+        "context": "_ctx1_py",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:DepreciationPropertyPlantAndEquipment",
+        "context": "_ctx2",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_fs:KeyManagementPersonnelCompensation",
+        "context": "_ctx2",
+        "unit": "unit_USD"
+      }
+    ]
+  }
+}-->
+  <variation id="bir51_fs_foreign_currency" name="bir51_fs_foreign_currency">
+    <description>A valid financial statements iXBRL data file for a BIR51 (corporation) filing where the entity's functional currency is USD. All monetary facts use a USD-denominated unit, consistent with CurrencyUsed in the paired TC file (NVAD-E-1430). ProfitLossBeforeTax = 0 in USD, matching the paired bir51_tc_foreign_currency.html file (NVAD-E-1390).</description>
+    <data>
+      <instance readMeFirst="true">bir51_fs_foreign_currency.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_foreign_currency" description="BIR51 TC — Foreign Functional Currency">
+  <!--{
+  "id": "bir51_tc_foreign_currency",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Foreign Functional Currency",
+  "description": "A valid BIR51 tax computation where the entity's functional currency is not HKD. CurrencyUsed is set to a valid ISO 4217 code (e.g. USD) and ConversionRate is the applicable exchange rate (not 1). All monetary facts in the TC file use a USD-denominated unit. The paired FS file must also use USD-denominated monetary units.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_foreign_currency.html",
+    "tc_report": "deliverables/bir51_tc_foreign_currency_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "CurrencyUsed = USD (or another valid ISO 4217 code)",
+    "ConversionRate = applicable exchange rate (e.g. 7.78), not 1",
+    "AssessableProfitsAdjustedLossInHongKongDollar tagged with HKD unit (the HKD-converted amount)",
+    "All other TC monetary facts use a USD-denominated unit"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-0240",
+    "NVAD-E-0260",
+    "NVAD-E-1170",
+    "NVAD-E-1370"
+  ],
+  "notes": "Pair with bir51_combined_foreign_currency for the full cross-file currency consistency check (NVAD-E-1430).",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "add_set_facts": [
+      {
+        "name": "ird_tc:CurrencyUsed",
+        "display": "USD"
+      },
+      {
+        "name": "ird_tc:ConversionRate",
+        "value": "7.78"
+      },
+      {
+        "name": "ird_tc:GrossIncome",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:IntellectualPropertyPayments",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:ProfitsEarnedByAFamilyOwnedSpecialPurposeEntityFromTransactionsSpecified",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:TransactionWithNonResidentHireCharges",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:TransactionWithNonResidentProfessionalServicesFee",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:DeductionClaimedInterestNonHongKongAssociatedCorporationsIntraGroupFinancingBusiness",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:DeductionClaimedForLeasedPremisesReinstatementCosts",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:ForeignTaxPaidClaimedAsAUnilateralTaxCredit",
+        "unit": "unit_USD"
+      }
+    ],
+    "add_facts": [
+      {
+        "after": "ird_tc:GrossIncome",
+        "name": "ird_tc:ProfitLossBeforeTax",
+        "label": "Profit (loss) before tax",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_USD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "0"
+      }
+    ]
+  }
+}-->
+  <variation id="bir51_tc_foreign_currency" name="bir51_tc_foreign_currency">
+    <description>A valid BIR51 tax computation where the entity's functional currency is not HKD. CurrencyUsed is set to a valid ISO 4217 code (e.g. USD) and ConversionRate is the applicable exchange rate (not 1). All monetary facts in the TC file use a USD-denominated unit. The paired FS file must also use USD-denominated monetary units.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_foreign_currency.html</instance>
+      <instance readMeFirst="true">bir51_fs_foreign_currency.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

@@ -1,0 +1,361 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_paired_details" description="BIR51 TC — Paired Detail + Value Elements">
+  <!--{
+  "id": "bir51_tc_paired_details",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Paired Detail + Value Elements",
+  "description": "A valid BIR51 tax computation that exercises all paired detail/value validation rules by including non-zero values for each income/expense category that requires a corresponding details text element. Covers service income, management fee income, interest, legal fees, management fee expense, contractor/subcontractor charges, bad debt provision, commission, charitable donations, building refurbishment, environmental protection assets, and share-based payments.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_paired_details.html",
+    "tc_report": "deliverables/bir51_tc_paired_details_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "ServiceIncome non-zero + ServiceFeeReceivedDetails tagged",
+    "ManagementFeeIncome non-zero + ManagementFeeReceivedDetails tagged",
+    "InterestExpenses non-zero + InterestPaidOrPayableDetails tagged",
+    "LegalAndProfessionalFee non-zero + LegalAndOtherProfessionalFeePaymentsDetails tagged",
+    "ManagementFee (expense) non-zero + ManagementFeePaymentsDetails tagged",
+    "ContractorCharges non-zero + ContractorAndSubcontractorChargesDetails tagged",
+    "SpecificProvisionForBadDebts non-zero + BadDebtProvisionDetails tagged",
+    "CommissionExpenses non-zero + CommissionPaymentsDetails tagged",
+    "TaxAdjustmentApprovedCharitableDonations non-zero + ApprovedCharitableDonationsDetails tagged",
+    "TaxAdjustmentExpenditureOnBuildingRefurbishment non-zero + ExpenditureOnBuildingRefurbishmentDetails tagged",
+    "Environmental protection machinery, installation, and vehicle adjustment elements with paired details",
+    "ShareBasedPaymentDetails tagged with at least one SBP amount non-zero"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-0270",
+    "NVAD-E-0280",
+    "NVAD-E-0290",
+    "NVAD-E-0300",
+    "NVAD-E-0330",
+    "NVAD-E-0340",
+    "NVAD-E-0350",
+    "NVAD-E-0370",
+    "NVAD-E-0371",
+    "NVAD-E-0372",
+    "NVAD-E-0380",
+    "NVAD-E-0390",
+    "NVAD-E-0400",
+    "NVAD-E-0410",
+    "NVAD-E-0420",
+    "NVAD-E-0430",
+    "NVAD-E-0440",
+    "NVAD-E-0441",
+    "NVAD-E-0450",
+    "NVAD-E-0460",
+    "NVAD-E-0470",
+    "NVAD-E-0480",
+    "NVAD-E-0490",
+    "NVAD-E-0740",
+    "NVAD-E-0750",
+    "NVAD-E-0760",
+    "NVAD-E-0770",
+    "NVAD-E-0780",
+    "NVAD-E-0790",
+    "NVAD-E-0800",
+    "NVAD-E-0810"
+  ],
+  "notes": "None of these paired elements appear in the existing kitchen-sink examples. This scenario fills that gap comprehensively.",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "add_facts": [
+      {
+        "after": "ird_tc:GrossIncome",
+        "name": "ird_tc:ServiceFeeIncome",
+        "label": "Service income",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ServiceFeeIncome",
+        "name": "ird_tc:ServiceFeeReceivedDetails",
+        "label": "Service fee received details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Consulting services provided to clients"
+      },
+      {
+        "after": "ird_tc:ServiceFeeReceivedDetails",
+        "name": "ird_tc:ManagementFeeIncome",
+        "label": "Management fee income",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ManagementFeeIncome",
+        "name": "ird_tc:ManagementFeeReceivedDetails",
+        "label": "Management fee received details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Management services rendered"
+      },
+      {
+        "after": "ird_tc:ManagementFeeReceivedDetails",
+        "name": "ird_tc:InterestExpenses",
+        "label": "Interest expenses",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:InterestExpenses",
+        "name": "ird_tc:InterestPaidOrPayableDetails",
+        "label": "Interest paid or payable details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Bank loan interest for the period"
+      },
+      {
+        "after": "ird_tc:InterestPaidOrPayableDetails",
+        "name": "ird_tc:LegalAndProfessionalFee",
+        "label": "Legal and professional fee",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:LegalAndProfessionalFee",
+        "name": "ird_tc:LegalAndOtherProfessionalFeePaymentsDetails",
+        "label": "Legal and professional fee payment details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Audit and legal advisory fees"
+      },
+      {
+        "after": "ird_tc:LegalAndOtherProfessionalFeePaymentsDetails",
+        "name": "ird_tc:ManagementFee",
+        "label": "Management fee",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ManagementFee",
+        "name": "ird_tc:ManagementFeePaymentsDetails",
+        "label": "Management fee payment details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Management fees paid to related party"
+      },
+      {
+        "after": "ird_tc:ManagementFeePaymentsDetails",
+        "name": "ird_tc:ContractorCharges",
+        "label": "Contractor charges",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ContractorCharges",
+        "name": "ird_tc:ContractorAndSubcontractorChargesDetails",
+        "label": "Contractor and subcontractor charges details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Subcontractor fees for project work"
+      },
+      {
+        "after": "ird_tc:ContractorAndSubcontractorChargesDetails",
+        "name": "ird_tc:ProvisionSpecificBadDebt",
+        "label": "Specific provision for bad debts",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ProvisionSpecificBadDebt",
+        "name": "ird_tc:BadDebtProvisionDetails",
+        "label": "Bad debt provision details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Provision for doubtful trade receivables"
+      },
+      {
+        "after": "ird_tc:BadDebtProvisionDetails",
+        "name": "ird_tc:Commission",
+        "label": "Commission expenses",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:Commission",
+        "name": "ird_tc:CommissionPaymentsDetails",
+        "label": "Commission payment details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Sales commission paid to agents"
+      },
+      {
+        "after": "ird_tc:CommissionPaymentsDetails",
+        "name": "ird_tc:ApprovedCharitableDonationsTaxAdjustment",
+        "label": "Tax adjustment — approved charitable donations",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ApprovedCharitableDonationsTaxAdjustment",
+        "name": "ird_tc:ApprovedCharitableDonationsDetails",
+        "label": "Approved charitable donations details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Donations to approved charitable organisations"
+      },
+      {
+        "after": "ird_tc:ApprovedCharitableDonationsDetails",
+        "name": "ird_tc:ExpenditureOnBuildingRefurbishmentTaxAdjustment",
+        "label": "Tax adjustment — building refurbishment",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ExpenditureOnBuildingRefurbishmentTaxAdjustment",
+        "name": "ird_tc:ExpenditureOnBuildingRefurbishmentDetails",
+        "label": "Building refurbishment expenditure details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Office refurbishment costs capitalised for tax"
+      },
+      {
+        "after": "ird_tc:ExpenditureOnBuildingRefurbishmentDetails",
+        "name": "ird_tc:ExpenditureOnEnvironmentalProtectionMachineryTaxAdjustment",
+        "label": "Tax adjustment — environmental protection machinery",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ExpenditureOnEnvironmentalProtectionMachineryTaxAdjustment",
+        "name": "ird_tc:DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentalProtectionMachinery",
+        "label": "Environmental protection machinery details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Purchase of energy-efficient production machinery"
+      },
+      {
+        "after": "ird_tc:DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentalProtectionMachinery",
+        "name": "ird_tc:ExpenditureOnEnvironmentalProtectionInstallationTaxAdjustment",
+        "label": "Tax adjustment — environmental protection installation",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ExpenditureOnEnvironmentalProtectionInstallationTaxAdjustment",
+        "name": "ird_tc:DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentalProtectionInstallation",
+        "label": "Environmental protection installation details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Installation of wastewater treatment system"
+      },
+      {
+        "after": "ird_tc:DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentalProtectionInstallation",
+        "name": "ird_tc:ExpenditureOnEnvironmentFriendlyVehiclesTaxAdjustment",
+        "label": "Tax adjustment — environment-friendly vehicles",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      },
+      {
+        "after": "ird_tc:ExpenditureOnEnvironmentFriendlyVehiclesTaxAdjustment",
+        "name": "ird_tc:DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentFriendlyVehicles",
+        "label": "Environment-friendly vehicle details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Purchase of electric commercial vehicle"
+      },
+      {
+        "after": "ird_tc:DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentFriendlyVehicles",
+        "name": "ird_tc:ShareBasedPaymentDetails",
+        "label": "Share-based payment details",
+        "type": "nonNumeric",
+        "context": "_ctx2",
+        "value": "Equity-settled share options granted to employees"
+      },
+      {
+        "after": "ird_tc:ShareBasedPaymentDetails",
+        "name": "ird_tc:ShareBasedPaymentCashSettled",
+        "label": "Cash-settled share-based payment",
+        "type": "nonFraction",
+        "context": "_ctx2",
+        "unit": "unit_HKD",
+        "decimals": "INF",
+        "scale": "0",
+        "format": "ixt:num-dot-decimal",
+        "value": "1000"
+      }
+    ]
+  }
+}-->
+  <variation id="bir51_tc_paired_details" name="bir51_tc_paired_details">
+    <description>A valid BIR51 tax computation that exercises all paired detail/value validation rules by including non-zero values for each income/expense category that requires a corresponding details text element. Covers service income, management fee income, interest, legal fees, management fee expense, contractor/subcontractor charges, bad debt provision, commission, charitable donations, building refurbishment, environmental protection assets, and share-based payments.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_paired_details.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

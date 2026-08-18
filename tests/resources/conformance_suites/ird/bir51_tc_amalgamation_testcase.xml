@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_amalgamation" description="BIR51 TC — Amalgamation">
+  <!--{
+  "id": "bir51_tc_amalgamation",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Amalgamation",
+  "description": "A valid BIR51 tax computation for a corporation that was involved in an amalgamation during the basis period. Amalgamation = true.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_amalgamation.html",
+    "tc_report": "deliverables/bir51_tc_amalgamation_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "Amalgamation = true",
+    "All other flags at baseline defaults"
+  ],
+  "validation_rules_tested": [],
+  "notes": "Amalgamation is a mandatory TC item for BIR51 (NVAD-E-0050 list item 29). This scenario ensures its positive case is exercised.",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:Amalgamation"
+    ]
+  }
+}-->
+  <variation id="bir51_tc_amalgamation" name="bir51_tc_amalgamation">
+    <description>A valid BIR51 tax computation for a corporation that was involved in an amalgamation during the basis period. Amalgamation = true.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_amalgamation.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

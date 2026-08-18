@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_fs_hkfrs_baseline" description="BIR52 FS — Full HKFRS (Baseline)">
+  <!--{
+  "id": "bir52_fs_hkfrs_baseline",
+  "group": "bir52_fs",
+  "title": "BIR52 FS — Full HKFRS (Baseline)",
+  "description": "A minimal valid financial statements iXBRL data file for a BIR52 (partnership/sole proprietorship) filing using the IRD FS Taxonomy. Revenue and ProfitLossBeforeTax are always mandatory for BIR52 (there is no consolidated-accounts exemption). TotalEquity is not required for BIR52.",
+  "form_type": "BIR52",
+  "scope": "fs_only",
+  "fs_taxonomy": "ird_fs",
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": null,
+    "tc_report": null,
+    "fs": "deliverables/bir52_fs_hkfrs_baseline.html",
+    "fs_report": "deliverables/bir52_fs_hkfrs_baseline_report.json"
+  },
+  "key_features": [
+    "IRD FS Taxonomy entry point (ird_fs)",
+    "Revenue tagged (always mandatory for BIR52)",
+    "ProfitLossBeforeTax tagged (always mandatory for BIR52)",
+    "TotalEquity not required (BIR51-only mandatory item)",
+    "TotalAssets = TotalEquityAndLiabilities"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1291",
+    "NVAD-E-1292",
+    "NVAD-E-1300"
+  ],
+  "notes": "Pair with bir52_tc_baseline_partnership in bir52_combined_baseline.",
+  "generation": {
+    "template": "templates/bir52_fs_hkfrs.html",
+    "title": "BIR52 FS — Full HKFRS (Baseline)"
+  }
+}-->
+  <variation id="bir52_fs_hkfrs_baseline" name="bir52_fs_hkfrs_baseline">
+    <description>A minimal valid financial statements iXBRL data file for a BIR52 (partnership/sole proprietorship) filing using the IRD FS Taxonomy. Revenue and ProfitLossBeforeTax are always mandatory for BIR52 (there is no consolidated-accounts exemption). TotalEquity is not required for BIR52.</description>
+    <data>
+      <instance readMeFirst="true">bir52_fs_hkfrs_baseline.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

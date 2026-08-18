@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_tc_sole_proprietor" description="BIR52 TC — Sole Proprietor">
+  <!--{
+  "id": "bir52_tc_sole_proprietor",
+  "group": "bir52_tc",
+  "title": "BIR52 TC — Sole Proprietor",
+  "description": "A minimal valid BIR52 tax computation for a sole proprietor (single person). A single partner dimension entry is used. The proprietor is the precedent partner. Profit sharing ratio = 100% and the full assessable profit is allocated to the single proprietor. This is the most common real-world BIR52 scenario.",
+  "form_type": "BIR52",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir52_tc_sole_proprietor.html",
+    "tc_report": "deliverables/bir52_tc_sole_proprietor_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "Single partner dimension entry",
+    "Proprietor is precedent partner (BIR52ProprietorPartnerPrecedentPartner = true)",
+    "BIR52ProprietorPartnerProfitLossSharingRatio = 1.0 (100%)",
+    "All 6 mandatory per-partner elements present",
+    "Individual HKID format for partner identifier"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1210",
+    "NVAD-E-1251",
+    "NVAD-E-1260",
+    "NVAD-E-1270",
+    "NVAD-E-1280"
+  ],
+  "notes": null,
+  "generation": {
+    "baseline": "bir52_tc_from_sole_proprietor"
+  }
+}-->
+  <variation id="bir52_tc_sole_proprietor" name="bir52_tc_sole_proprietor">
+    <description>A minimal valid BIR52 tax computation for a sole proprietor (single person). A single partner dimension entry is used. The proprietor is the precedent partner. Profit sharing ratio = 100% and the full assessable profit is allocated to the single proprietor. This is the most common real-world BIR52 scenario.</description>
+    <data>
+      <instance readMeFirst="true">bir52_tc_sole_proprietor.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

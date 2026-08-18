@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_fs_hkfrs_consolidated" description="BIR51 FS — Full HKFRS, Consolidated Accounts">
+  <!--{
+  "id": "bir51_fs_hkfrs_consolidated",
+  "group": "bir51_fs",
+  "title": "BIR51 FS — Full HKFRS, Consolidated Accounts",
+  "description": "A valid financial statements iXBRL data file for a BIR51 (corporation) filing where accounts are prepared at consolidated level (AccountsPreparedAtConsolidatedLevel = true in the TC file). Revenue and ProfitLossBeforeTax are not mandatory in this path. TotalEquity remains mandatory. The FS file is trimmed to entity-level statement of financial position and other relevant entity-level information.",
+  "form_type": "BIR51",
+  "scope": "fs_only",
+  "fs_taxonomy": "ird_fs",
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": null,
+    "tc_report": null,
+    "fs": "deliverables/bir51_fs_hkfrs_consolidated.html",
+    "fs_report": "deliverables/bir51_fs_hkfrs_consolidated_report.json"
+  },
+  "key_features": [
+    "IRD FS Taxonomy entry point (ird_fs)",
+    "Revenue omitted (not mandatory when consolidated accounts filed)",
+    "ProfitLossBeforeTax omitted (not mandatory when consolidated accounts filed)",
+    "TotalEquity tagged (still mandatory)",
+    "TotalAssets = TotalEquityAndLiabilities"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1290",
+    "NVAD-E-1291",
+    "NVAD-E-1292",
+    "NVAD-E-1300"
+  ],
+  "notes": "Pair with bir51_tc_consolidated_accounts in bir51_combined_consolidated.",
+  "generation": {
+    "template": "templates/bir51_fs_hkfrs.html",
+    "title": "BIR51 FS — Full HKFRS, Consolidated Accounts",
+    "add_remove_facts": [
+      "ird_fs:Revenue",
+      "ird_fs:CostOfSales",
+      "ird_fs:GrossProfit",
+      "ird_fs:ProfitLossBeforeTax"
+    ]
+  }
+}-->
+  <variation id="bir51_fs_hkfrs_consolidated" name="bir51_fs_hkfrs_consolidated">
+    <description>A valid financial statements iXBRL data file for a BIR51 (corporation) filing where accounts are prepared at consolidated level (AccountsPreparedAtConsolidatedLevel = true in the TC file). Revenue and ProfitLossBeforeTax are not mandatory in this path. TotalEquity remains mandatory. The FS file is trimmed to entity-level statement of financial position and other relevant entity-level information.</description>
+    <data>
+      <instance readMeFirst="true">bir51_fs_hkfrs_consolidated.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

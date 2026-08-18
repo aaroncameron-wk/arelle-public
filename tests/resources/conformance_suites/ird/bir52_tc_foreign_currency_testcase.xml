@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir52_tc_foreign_currency" description="BIR52 TC — Foreign Functional Currency">
+  <!--{
+  "id": "bir52_tc_foreign_currency",
+  "group": "bir52_tc",
+  "title": "BIR52 TC — Foreign Functional Currency",
+  "description": "A valid BIR52 tax computation (two-partner partnership) where the entity's functional currency is not HKD. CurrencyUsed is set to a valid ISO 4217 code and ConversionRate reflects the applicable exchange rate.",
+  "form_type": "BIR52",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir52_tc_foreign_currency.html",
+    "tc_report": "deliverables/bir52_tc_foreign_currency_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "CurrencyUsed = USD (or another valid ISO 4217 code)",
+    "ConversionRate non-1",
+    "AssessableProfitsAdjustedLossInHongKongDollar in HKD unit",
+    "All other TC monetary facts in functional currency unit"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-0240",
+    "NVAD-E-0260",
+    "NVAD-E-1370"
+  ],
+  "notes": null,
+  "generation": {
+    "baseline": "bir52_tc_from_all_flags",
+    "add_set_facts": [
+      {
+        "name": "ird_tc:CurrencyUsed",
+        "display": "USD"
+      },
+      {
+        "name": "ird_tc:ConversionRate",
+        "value": "7.78"
+      },
+      {
+        "name": "ird_tc:GrossIncome",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:IntellectualPropertyPayments",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:TransactionWithNonResidentHireCharges",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:TransactionWithNonResidentProfessionalServicesFee",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:DeductionClaimedForLeasedPremisesReinstatementCosts",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:ForeignTaxPaidClaimedAsAUnilateralTaxCredit",
+        "unit": "unit_USD"
+      },
+      {
+        "name": "ird_tc:BIR52ProprietorPartnerAllocationOfAssessableProfitsAdjustedLoss",
+        "unit": "unit_USD",
+        "context": "_ctx_p1"
+      },
+      {
+        "name": "ird_tc:BIR52ProprietorPartnerAllocationOfAssessableProfitsAdjustedLoss",
+        "unit": "unit_USD",
+        "context": "_ctx_p2"
+      },
+      {
+        "name": "ird_tc:BIR52ProprietorPartnerMPF",
+        "unit": "unit_USD",
+        "context": "_ctx_p1"
+      },
+      {
+        "name": "ird_tc:BIR52ProprietorPartnerMPF",
+        "unit": "unit_USD",
+        "context": "_ctx_p2"
+      },
+      {
+        "name": "ird_tc:ProfitLossBeforeTax",
+        "unit": "unit_USD"
+      }
+    ]
+  }
+}-->
+  <variation id="bir52_tc_foreign_currency" name="bir52_tc_foreign_currency">
+    <description>A valid BIR52 tax computation (two-partner partnership) where the entity's functional currency is not HKD. CurrencyUsed is set to a valid ISO 4217 code and ConversionRate reflects the applicable exchange rate.</description>
+    <data>
+      <instance readMeFirst="true">bir52_tc_foreign_currency.html</instance>
+      <instance readMeFirst="true">bir52_fs_hkfrs_baseline.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

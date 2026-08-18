@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_advance_ruling" description="BIR51 TC — Advance Ruling">
+  <!--{
+  "id": "bir51_tc_advance_ruling",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Advance Ruling",
+  "description": "A valid BIR51 tax computation where the taxpayer has obtained an advance ruling. AdvanceRuling = true and AdvanceRulingDetails is tagged.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_advance_ruling.html",
+    "tc_report": "deliverables/bir51_tc_advance_ruling_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "AdvanceRuling = true",
+    "AdvanceRulingDetails tagged with non-empty text"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-0940",
+    "NVAD-E-0950"
+  ],
+  "notes": null,
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:AdvanceRuling"
+    ],
+    "skip_remove_facts": [
+      "ird_tc:AdvanceRulingDetails"
+    ]
+  }
+}-->
+  <variation id="bir51_tc_advance_ruling" name="bir51_tc_advance_ruling">
+    <description>A valid BIR51 tax computation where the taxpayer has obtained an advance ruling. AdvanceRuling = true and AdvanceRulingDetails is tagged.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_advance_ruling.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

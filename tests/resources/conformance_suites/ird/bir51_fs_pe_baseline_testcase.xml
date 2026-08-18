@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_fs_pe_baseline" description="BIR51 FS — HKFRS for Private Entities (FS-PE Taxonomy)">
+  <!--{
+  "id": "bir51_fs_pe_baseline",
+  "group": "bir51_fs",
+  "title": "BIR51 FS — HKFRS for Private Entities (FS-PE Taxonomy)",
+  "description": "A valid financial statements iXBRL data file for a BIR51 (corporation) filing prepared under HKFRS for Private Entities or SME-FRF & SME-FRS, using the IRD FS-PE Taxonomy. Mandatory FS items are the same as the full HKFRS path (Revenue, ProfitLossBeforeTax, TotalEquity) but the entry point and element namespace differ.",
+  "form_type": "BIR51",
+  "scope": "fs_only",
+  "fs_taxonomy": "ird_fs_pe",
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": null,
+    "tc_report": null,
+    "fs": "deliverables/bir51_fs_pe_baseline.html",
+    "fs_report": "deliverables/bir51_fs_pe_baseline_report.json"
+  },
+  "key_features": [
+    "IRD FS-PE Taxonomy entry point (ird_fs_pe)",
+    "Appropriate for private entities / SME-FRF & SME-FRS reporters",
+    "Revenue, ProfitLossBeforeTax, TotalEquity tagged",
+    "Balance sheet identity maintained"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1290",
+    "NVAD-E-1291",
+    "NVAD-E-1292",
+    "NVAD-E-1300"
+  ],
+  "notes": null,
+  "generation": {
+    "template": "templates/bir51_fs_pe.html",
+    "title": "BIR51 FS — HKFRS for Private Entities (FS-PE Taxonomy)"
+  }
+}-->
+  <variation id="bir51_fs_pe_baseline" name="bir51_fs_pe_baseline">
+    <description>A valid financial statements iXBRL data file for a BIR51 (corporation) filing prepared under HKFRS for Private Entities or SME-FRF &amp; SME-FRS, using the IRD FS-PE Taxonomy. Mandatory FS items are the same as the full HKFRS path (Revenue, ProfitLossBeforeTax, TotalEquity) but the entry point and element namespace differ.</description>
+    <data>
+      <instance readMeFirst="true">bir51_fs_pe_baseline.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>

@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testcase xmlns="http://xbrl.org/2005/conformance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="bir51_tc_consolidated_accounts" description="BIR51 TC — Consolidated Accounts">
+  <!--{
+  "id": "bir51_tc_consolidated_accounts",
+  "group": "bir51_tc",
+  "title": "BIR51 TC — Consolidated Accounts",
+  "description": "A valid BIR51 tax computation where the entity submits consolidated audited financial statements (AccountsPreparedAtConsolidatedLevel = true). This affects the paired FS file: Revenue and ProfitLossBeforeTax are not mandatory when consolidated accounts are filed. All other mandatory TC items remain required.",
+  "form_type": "BIR51",
+  "scope": "tc_only",
+  "fs_taxonomy": null,
+  "status": "planned",
+  "validity": "valid",
+  "known_issues": null,
+  "files": {
+    "tc": "deliverables/bir51_tc_consolidated_accounts.html",
+    "tc_report": "deliverables/bir51_tc_consolidated_accounts_report.json",
+    "fs": null,
+    "fs_report": null
+  },
+  "key_features": [
+    "AccountsPreparedAtConsolidatedLevel = true",
+    "All other flags = false / minimal",
+    "Revenue and ProfitLossBeforeTax tagging is optional in the paired FS file under this path"
+  ],
+  "validation_rules_tested": [
+    "NVAD-E-1291",
+    "NVAD-E-1292"
+  ],
+  "notes": "Pair with bir51_fs_hkfrs_consolidated for the combined scenario that exercises the consolidated-accounts FS exemption.",
+  "generation": {
+    "baseline": "bir51_tc_from_all_flags",
+    "skip_set_facts": [
+      "ird_tc:AccountsPreparedAtConsolidatedLevel"
+    ]
+  }
+}-->
+  <variation id="bir51_tc_consolidated_accounts" name="bir51_tc_consolidated_accounts">
+    <description>A valid BIR51 tax computation where the entity submits consolidated audited financial statements (AccountsPreparedAtConsolidatedLevel = true). This affects the paired FS file: Revenue and ProfitLossBeforeTax are not mandatory when consolidated accounts are filed. All other mandatory TC items remain required.</description>
+    <data>
+      <instance readMeFirst="true">bir51_tc_consolidated_accounts.html</instance>
+    </data>
+    <result expected="valid"/>
+  </variation>
+</testcase>
