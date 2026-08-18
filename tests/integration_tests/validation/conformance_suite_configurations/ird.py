@@ -13,6 +13,7 @@ config = ConformanceSuiteConfig(
         ),
     ],
     base_taxonomy_validation="none",
+    disclosure_system="ird-2025-draft",
     expected_failure_ids=frozenset({
         # Not implemented
         "553-E-0467-unknown-entrypoint_invalid_testcase.xml:553-E-0467-unknown-entrypoint_invalid",
@@ -42,9 +43,6 @@ config = ConformanceSuiteConfig(
         "NVAD-E-0120-too-early_invalid_testcase.xml:NVAD-E-0120-too-early_invalid",
         "NVAD-E-0120-too-late_invalid_testcase.xml:NVAD-E-0120-too-late_invalid",
         "NVAD-E-0120_invalid_testcase.xml:NVAD-E-0120_invalid",
-        "NVAD-E-0130_invalid_testcase.xml:NVAD-E-0130_invalid",
-        "NVAD-E-0140_invalid_testcase.xml:NVAD-E-0140_invalid",
-        "NVAD-E-0150_invalid_testcase.xml:NVAD-E-0150_invalid",
         "NVAD-E-0170_invalid_testcase.xml:NVAD-E-0170_invalid",
         "NVAD-E-0180-length_invalid_testcase.xml:NVAD-E-0180-length_invalid",
         "NVAD-E-0180_invalid_testcase.xml:NVAD-E-0180_invalid",
@@ -139,4 +137,5 @@ config = ConformanceSuiteConfig(
     }),
     info_url="https://www.ird.gov.hk/eng/tax/bus_ixbrl.htm",
     name=PurePath(__file__).stem,
+    plugins=frozenset({"validate/IRD", "inlineXbrlDocumentSet"}),
 )
