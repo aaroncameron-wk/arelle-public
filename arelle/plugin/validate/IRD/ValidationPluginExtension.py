@@ -312,6 +312,16 @@ class ValidationPluginExtension(ValidationPlugin):
             shareBasedPaymentEquitySettledGroupNoRechargeQn=tcQn("ShareBasedPaymentEquitySettledGroupCoNoRecharge"),
             shareBasedPaymentEquitySettledGroupRechargeQn=tcQn("ShareBasedPaymentEquitySettledGroupCoRecharge"),
 
+            # environmental
+            buildingRefurbTaxAdjQn=tcQn("ExpenditureOnBuildingRefurbishmentTaxAdjustment"),
+            buildingRefurbDetailsQn=tcQn("ExpenditureOnBuildingRefurbishmentDetails"),
+            epMachineryTaxAdjQn=tcQn("ExpenditureOnEnvironmentalProtectionMachineryTaxAdjustment"),
+            epMachineryDetailsQn=tcQn("DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentalProtectionMachinery"),
+            epInstallationTaxAdjQn=tcQn("ExpenditureOnEnvironmentalProtectionInstallationTaxAdjustment"),
+            epInstallationDetailsQn=tcQn("DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentalProtectionInstallation"),
+            efVehiclesTaxAdjQn=tcQn("ExpenditureOnEnvironmentFriendlyVehiclesTaxAdjustment"),
+            efVehiclesDetailsQn=tcQn("DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentFriendlyVehicles"),
+
             # BIR51 corporate
             privateCompanyQn=tcQn("PrivateCompany"),
             shareholderChangeQn=tcQn("ShareholderChange"),

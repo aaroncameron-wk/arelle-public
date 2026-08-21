@@ -23,6 +23,7 @@ from .rules import (
     nvad_bir52_partners,
     nvad_combined_fs,
     nvad_currency,
+    nvad_environmental,
     nvad_expense_deductions,
     nvad_expense_misc,
     nvad_form_type,
@@ -52,6 +53,7 @@ validationPlugin = ValidationPluginExtension(
         nvad_bir51_corporate,
         nvad_bir52_partners,
         nvad_combined_fs,
+        nvad_environmental,
     ],
 )
 
