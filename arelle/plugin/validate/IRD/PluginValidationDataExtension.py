@@ -70,6 +70,16 @@ class PluginValidationDataExtension(PluginData):
     offshoreProfitsExcludedQn: QName      # OffshoreProfitsExcluded
     reasonsForOffshoreClaimQn: QName      # ReasonsForTheOffshoreClaim
 
+    # Expense deductions (nvad_expense_deductions)
+    commissionQn: QName                              # Commission
+    commissionPaymentsDetailsQn: QName               # CommissionPaymentsDetails
+    approvedCharitableDonationsTaxAdjQn: QName       # ApprovedCharitableDonationsTaxAdjustment
+    approvedCharitableDonationsDetailsQn: QName      # ApprovedCharitableDonationsDetails
+    interestExpensesQn: QName                        # InterestExpenses
+    interestPaidOrPayableDetailsQn: QName            # InterestPaidOrPayableDetails
+    legalAndProfessionalFeeQn: QName                 # LegalAndProfessionalFee
+    legalAndProfessionalFeeDetailsQn: QName          # LegalAndOtherProfessionalFeePaymentsDetails
+
     # HKSIC code (nvad_structural, NVAD-E-0170/0180/0190)
     hksicCodeQn: QName
     hksicCodeRegex: re.Pattern[str]     # r'^\d{6}$'
