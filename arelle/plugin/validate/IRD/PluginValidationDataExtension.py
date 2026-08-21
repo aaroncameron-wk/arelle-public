@@ -96,6 +96,16 @@ class PluginValidationDataExtension(PluginData):
     shareBasedPaymentEquitySettledGroupNoRechargeQn: QName  # ShareBasedPaymentEquitySettledGroupCoNoRecharge
     shareBasedPaymentEquitySettledGroupRechargeQn: QName    # ShareBasedPaymentEquitySettledGroupCoRecharge
 
+    # BIR51 corporate flags (nvad_bir51_corporate)
+    privateCompanyQn: QName
+    shareholderChangeQn: QName
+    insuranceRbcFlagQn: QName          # InsuranceCorporationCommencingToImplementRiskBasedCapitalRegimeToDetermineCapitalRequirements
+    incomeRbcAmountQn: QName           # IncomeAmountOfOneOffAdjustmentArisingFromImplementationOfRBCRegime
+    lossRbcAmountQn: QName             # LossAmountOfOneOffAdjustmentArisingFromImplementationOfRBCRegime
+    electToTreatOneOffAdjustmentQn: QName  # ElectToTreatOneOffAdjustmentAsYourIncomeOrLossBy5EqualAmounts
+    familyOwnedSpeQn: QName            # FamilyOwnedSpecialPurposeEntityInWhichAnEligibleFamilyOwnedInvestmentHoldingVehicleHasBeneficialInterest
+    profitsEarnedByFamilyOwnedSpeQn: QName  # ProfitsEarnedByAFamilyOwnedSpecialPurposeEntityFromTransactionsSpecified
+
     # HKSIC code (nvad_structural, NVAD-E-0170/0180/0190)
     hksicCodeQn: QName
     hksicCodeRegex: re.Pattern[str]     # r'^\d{6}$'
