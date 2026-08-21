@@ -51,6 +51,15 @@ class ValidationPluginExtension(ValidationPlugin):
             f"{BASE}ird_fs_pe_entry_point_2026-04-01.xsd",
         ])
 
+        # Every version date the IRD has released to date, including
+        # the current latest. Used to distinguish a superseded (but
+        # once-valid) taxonomy version from one that was never issued.
+        releasedVersionDates = frozenset([
+            "2024-04-01",
+            "2025-04-01",
+            "2026-04-01",
+        ])
+
         # Concepts that must NOT appear in a BIR51 (corporation) filing
         # per NVAD-E-0060.
         bir52Exclusive = frozenset([
@@ -251,6 +260,9 @@ class ValidationPluginExtension(ValidationPlugin):
             validTcEntryPoints=validTc,
             validFsEntryPoints=validFs,
             validFsPeEntryPoints=validFsPe,
+            allValidEntryPoints=validTc | validFs | validFsPe,
+            latestVersionDate="2026-04-01",
+            releasedVersionDates=releasedVersionDates,
 
             # mandatory element sets
             mandatoryTcBir51Qns=mandatoryBir51,

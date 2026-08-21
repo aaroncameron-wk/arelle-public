@@ -32,6 +32,13 @@ class PluginValidationDataExtension(PluginData):
     validTcEntryPoints: frozenset[str]
     validFsEntryPoints: frozenset[str]
     validFsPeEntryPoints: frozenset[str]
+    allValidEntryPoints: frozenset[str]
+    latestVersionDate: str          # e.g. "2026-04-01"
+    # Every version date the IRD has ever released (includes
+    # latestVersionDate); used by ixbrl_technical to distinguish a
+    # superseded-but-recognised version (553-E-0468) from a version
+    # date that was never released at all (553-E-0470/0486/0500).
+    releasedVersionDates: frozenset[str]
 
     assessmentYear: int
 
