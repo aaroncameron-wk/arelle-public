@@ -322,6 +322,14 @@ class ValidationPluginExtension(ValidationPlugin):
             efVehiclesTaxAdjQn=tcQn("ExpenditureOnEnvironmentFriendlyVehiclesTaxAdjustment"),
             efVehiclesDetailsQn=tcQn("DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentFriendlyVehicles"),
 
+            # special flags
+            advanceRulingQn=tcQn("AdvanceRuling"),
+            advanceRulingDetailsQn=tcQn("AdvanceRulingDetails"),
+            permanentEstablishmentQn=tcQn("PermanentEstablishmentHongKongNonHongKongResidentPerson"),
+            transactionsWithOtherPartsQn=tcQn("TransactionsWithOtherPartsNonHongKongResidentPerson"),
+            practisingCertificateNumberQn=tcQn("PractisingCertificateNumber"),
+            hongKongPracticeUnitQn=tcQn("HongKongPracticeUnit"),
+
             # BIR51 corporate
             privateCompanyQn=tcQn("PrivateCompany"),
             shareholderChangeQn=tcQn("ShareholderChange"),

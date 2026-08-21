@@ -108,6 +108,14 @@ class PluginValidationDataExtension(PluginData):
     efVehiclesTaxAdjQn: QName          # ExpenditureOnEnvironmentFriendlyVehiclesTaxAdjustment
     efVehiclesDetailsQn: QName         # DetailsOfExpenditureIncurredOnAndProceedsFromTheSaleOfEnvironmentFriendlyVehicles
 
+    # Special flags (nvad_special_flags)
+    advanceRulingQn: QName             # AdvanceRuling
+    advanceRulingDetailsQn: QName      # AdvanceRulingDetails
+    permanentEstablishmentQn: QName    # PermanentEstablishmentHongKongNonHongKongResidentPerson
+    transactionsWithOtherPartsQn: QName  # TransactionsWithOtherPartsNonHongKongResidentPerson
+    practisingCertificateNumberQn: QName
+    hongKongPracticeUnitQn: QName
+
     # BIR51 corporate flags (nvad_bir51_corporate)
     privateCompanyQn: QName
     shareholderChangeQn: QName
