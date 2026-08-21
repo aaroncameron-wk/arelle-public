@@ -30,6 +30,8 @@ class PluginValidationDataExtension(PluginData):
 
     # Taxonomy entry point URIs (553-E rules)
     validTcEntryPoints: frozenset[str]
+    validFsEntryPoints: frozenset[str]
+    validFsPeEntryPoints: frozenset[str]
 
     assessmentYear: int
 
@@ -120,6 +122,20 @@ class PluginValidationDataExtension(PluginData):
     bir52PartnerHkidOrBrnQn: QName                  # BIR52ProprietorPartnerHKIDOrBRNumber
     bir52PartnerDateEnteredQn: QName
     bir52PartnerDateLeftQn: QName
+
+    # Combined FS (nvad_combined_fs)
+    accountsPreparedAtConsolidatedLevelQn: QName  # ird_tc:AccountsPreparedAtConsolidatedLevel (NVAD-E-1291/1292)
+    tcProfitLossBeforeTaxQn: QName     # ird_tc:ProfitLossBeforeTax
+    fsEquityQn: QName                  # ird_fs:Equity  (NVAD-E-1290)
+    fsPeEquityQn: QName                # ird_fs_pe:Equity (NVAD-E-1290, PE taxonomy)
+    fsRevenueQn: QName                 # ird_fs:Revenue (NVAD-E-1291)
+    fsPeRevenueQn: QName               # ird_fs_pe:Revenue (NVAD-E-1291, PE taxonomy)
+    fsProfitLossBeforeTaxQn: QName     # ird_fs:ProfitLossBeforeTax (NVAD-E-1292, 1390)
+    fsPeProfitLossBeforeTaxQn: QName   # ird_fs_pe:ProfitLossBeforeTax (NVAD-E-1292, PE taxonomy)
+    fsAssetsQn: QName                  # ird_fs:Assets  (NVAD-E-1300)
+    fsPeAssetsQn: QName                # ird_fs_pe:Assets (NVAD-E-1300, PE taxonomy)
+    fsEquityAndLiabilitiesQn: QName    # ird_fs:EquityAndLiabilities (NVAD-E-1300)
+    fsPeEquityAndLiabilitiesQn: QName  # ird_fs_pe:EquityAndLiabilities (NVAD-E-1300, PE taxonomy)
 
     # HKSIC code (nvad_structural, NVAD-E-0170/0180/0190)
     hksicCodeQn: QName

@@ -23,6 +23,14 @@ def tcQn(local: str) -> QName:
     return qname(f"{{{TC_NAMESPACE}}}{local}")
 
 
+def fsQn(local: str) -> QName:
+    return qname(f"{{{FS_NAMESPACE}}}{local}")
+
+
+def fsPeQn(local: str) -> QName:
+    return qname(f"{{{FS_PE_NAMESPACE}}}{local}")
+
+
 class ValidationPluginExtension(ValidationPlugin):
     def newPluginData(
         self,
@@ -35,6 +43,12 @@ class ValidationPluginExtension(ValidationPlugin):
         validTc = frozenset([
             f"{BASE}ird_tc_entry_point_2026-04-01.xsd",
             f"{BASE}ird_tc-zh-hk_entry_point_2026-04-01.xsd",
+        ])
+        validFs = frozenset([
+            f"{BASE}ird_fs_entry_point_2026-04-01.xsd",
+        ])
+        validFsPe = frozenset([
+            f"{BASE}ird_fs_pe_entry_point_2026-04-01.xsd",
         ])
 
         # Concepts that must NOT appear in a BIR51 (corporation) filing
@@ -235,6 +249,8 @@ class ValidationPluginExtension(ValidationPlugin):
 
             # entry points
             validTcEntryPoints=validTc,
+            validFsEntryPoints=validFs,
+            validFsPeEntryPoints=validFsPe,
 
             # mandatory element sets
             mandatoryTcBir51Qns=mandatoryBir51,
@@ -319,6 +335,22 @@ class ValidationPluginExtension(ValidationPlugin):
             bir52PartnerHkidOrBrnQn=tcQn("BIR52ProprietorPartnerHKIDOrBRNumber"),
             bir52PartnerDateEnteredQn=tcQn("BIR52ProprietorPartnerDateEntered"),
             bir52PartnerDateLeftQn=tcQn("BIR52ProprietorPartnerDateLeft"),
+
+            # combined / FS
+            accountsPreparedAtConsolidatedLevelQn=tcQn(
+                "AccountsPreparedAtConsolidatedLevel"
+            ),
+            tcProfitLossBeforeTaxQn=tcQn("ProfitLossBeforeTax"),
+            fsEquityQn=fsQn("Equity"),
+            fsPeEquityQn=fsPeQn("Equity"),
+            fsRevenueQn=fsQn("Revenue"),
+            fsPeRevenueQn=fsPeQn("Revenue"),
+            fsProfitLossBeforeTaxQn=fsQn("ProfitLossBeforeTax"),
+            fsPeProfitLossBeforeTaxQn=fsPeQn("ProfitLossBeforeTax"),
+            fsAssetsQn=fsQn("Assets"),
+            fsPeAssetsQn=fsPeQn("Assets"),
+            fsEquityAndLiabilitiesQn=fsQn("EquityAndLiabilities"),
+            fsPeEquityAndLiabilitiesQn=fsPeQn("EquityAndLiabilities"),
 
             # HKSIC
             hksicCodeQn=tcQn("HongKongStandardIndustrialClassificationCode"),
