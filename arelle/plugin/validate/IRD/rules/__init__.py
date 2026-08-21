@@ -20,6 +20,7 @@ from arelle.utils.validate.Validation import Validation
 
 if TYPE_CHECKING:
     from arelle.ModelInstanceObject import ModelFact
+    from arelle.ModelObject import ModelObject
     from arelle.ModelXbrl import ModelXbrl
 
 
@@ -106,6 +107,16 @@ def factUnitCurrencyCode(fact: ModelFact) -> str | None:
     if measure.namespaceURI != ISO4217_NAMESPACE:
         return None
     return measure.localName
+
+
+# ── schemaRef Inspection (553-E rules) ──────────────────────────────────────
+
+XLINK_HREF = "{http://www.w3.org/1999/xlink}href"
+
+
+def schemaRefHref(ref: ModelObject) -> str:
+    """Return the ``xlink:href`` of a ``link:schemaRef`` element."""
+    return ref.get(XLINK_HREF, "") or ""
 
 
 # ── Details / Amount Pairing Helpers ─────────────────────────────────────────

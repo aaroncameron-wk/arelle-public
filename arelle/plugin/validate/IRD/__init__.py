@@ -17,6 +17,7 @@ from arelle.Version import authorLabel, copyrightLabel
 
 from .ValidationPluginExtension import ValidationPluginExtension
 from .rules import (
+    ixbrl_technical,
     nvad_accounting_period,
     nvad_bir51_corporate,
     nvad_bir51_sbp,
@@ -60,6 +61,7 @@ validationPlugin = ValidationPluginExtension(
         nvad_special_flags,
         nvad_lifecycle,
         nvad_integrity,
+        ixbrl_technical,
     ],
 )
 
