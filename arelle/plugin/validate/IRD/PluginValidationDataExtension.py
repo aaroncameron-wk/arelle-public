@@ -116,6 +116,18 @@ class PluginValidationDataExtension(PluginData):
     practisingCertificateNumberQn: QName
     hongKongPracticeUnitQn: QName
 
+    # Business lifecycle (nvad_lifecycle)
+    businessCommencementQn: QName
+    businessCommencementDateQn: QName
+    businessCessationQn: QName
+    businessCessationDateQn: QName
+    businessCessationDeathOfProprietorQn: QName
+    businessCessationProprietorDeathDateQn: QName
+    businessCessationTransferredQn: QName
+    businessCessationTransfereeQn: QName
+    businessCessationTransfereeBusinessNatureQn: QName
+    businessCessationTransferredAssetsAssociatedQn: QName  # BusinessCessationTransferredAssetsAssociated
+
     # BIR51 corporate flags (nvad_bir51_corporate)
     privateCompanyQn: QName
     shareholderChangeQn: QName

@@ -330,6 +330,18 @@ class ValidationPluginExtension(ValidationPlugin):
             practisingCertificateNumberQn=tcQn("PractisingCertificateNumber"),
             hongKongPracticeUnitQn=tcQn("HongKongPracticeUnit"),
 
+            # lifecycle
+            businessCommencementQn=tcQn("BusinessCommencement"),
+            businessCommencementDateQn=tcQn("BusinessCommencementDate"),
+            businessCessationQn=tcQn("BusinessCessation"),
+            businessCessationDateQn=tcQn("BusinessCessationDate"),
+            businessCessationDeathOfProprietorQn=tcQn("BusinessCessationDeathOfProprietor"),
+            businessCessationProprietorDeathDateQn=tcQn("BusinessCessationProprietorDeathDate"),
+            businessCessationTransferredQn=tcQn("BusinessCessationTransferred"),
+            businessCessationTransfereeQn=tcQn("BusinessCessationTransferee"),
+            businessCessationTransfereeBusinessNatureQn=tcQn("BusinessCessationTransfereeBusinessNature"),
+            businessCessationTransferredAssetsAssociatedQn=tcQn("BusinessCessationTransferredAssetsAssociated"),
+
             # BIR51 corporate
             privateCompanyQn=tcQn("PrivateCompany"),
             shareholderChangeQn=tcQn("ShareholderChange"),
