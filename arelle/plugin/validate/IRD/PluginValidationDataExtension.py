@@ -62,6 +62,14 @@ class PluginValidationDataExtension(PluginData):
     # AssessableProfitsAdjustedLossOfThePeriodHKD (NVAD-E-1170, 1180)
     assessableProfitsQn: QName
 
+    # Income paired (nvad_income_paired)
+    serviceFeeIncomeQn: QName             # ServiceFeeIncome
+    serviceFeeReceivedDetailsQn: QName    # ServiceFeeReceivedDetails
+    managementFeeIncomeQn: QName          # ManagementFeeIncome
+    managementFeeReceivedDetailsQn: QName  # ManagementFeeReceivedDetails
+    offshoreProfitsExcludedQn: QName      # OffshoreProfitsExcluded
+    reasonsForOffshoreClaimQn: QName      # ReasonsForTheOffshoreClaim
+
     # HKSIC code (nvad_structural, NVAD-E-0170/0180/0190)
     hksicCodeQn: QName
     hksicCodeRegex: re.Pattern[str]     # r'^\d{6}$'
