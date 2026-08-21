@@ -80,6 +80,15 @@ class PluginValidationDataExtension(PluginData):
     legalAndProfessionalFeeQn: QName                 # LegalAndProfessionalFee
     legalAndProfessionalFeeDetailsQn: QName          # LegalAndOtherProfessionalFeePaymentsDetails
 
+    # Expense misc (nvad_expense_misc)
+    managementFeeQn: QName                           # ManagementFee (expense)
+    managementFeePaymentsDetailsQn: QName            # ManagementFeePaymentsDetails
+    contractorChargesQn: QName                       # ContractorCharges
+    subContractorChargesQn: QName                    # SubContractorCharges
+    contractorAndSubcontractorChargesDetailsQn: QName
+    provisionSpecificBadDebtQn: QName                # ProvisionSpecificBadDebt
+    badDebtProvisionDetailsQn: QName                 # BadDebtProvisionDetails
+
     # HKSIC code (nvad_structural, NVAD-E-0170/0180/0190)
     hksicCodeQn: QName
     hksicCodeRegex: re.Pattern[str]     # r'^\d{6}$'
